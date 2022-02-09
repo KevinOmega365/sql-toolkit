@@ -1,2 +1,3 @@
 # sql-toolkit
-SQL Snippets
+
+SQL Snippets (mostly for Omega365 Appframe Databases)
