@@ -9,3 +9,15 @@ FROM
         on c.object_id = o.object_id
 WHERE
     o.name = @viewOrTableName
+
+-- or
+
+select
+    name,
+    system_type_name
+from
+    sys.dm_exec_describe_first_result_set(
+        'select * from ' + @viewOrTableName,
+        null,
+        0
+    )
