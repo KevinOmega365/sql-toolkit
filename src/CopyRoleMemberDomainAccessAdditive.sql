@@ -3,8 +3,8 @@
  *  Copy Role Member Domain access (additive)
  */
 
-DECLARE @fromLogin NVARCHAR(128) = 'jonerik@omega.no'
-DECLARE @toLogin NVARCHAR(128) = 'kevin@omega.no'
+DECLARE @fromLogin NVARCHAR(128) = 'from.this.user@foo.bar'
+DECLARE @toLogin NVARCHAR(128) = 'to.this.user@baz.qux'
 
 -- -- INSERT INTO dbo.stbl_System_RolesMembers (
 -- --     RoleID,
