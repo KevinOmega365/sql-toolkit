@@ -4,7 +4,7 @@
 
 DECLARE
     @Domain NVARCHAR(128) = '175',
-    @DocumentGroup NVARCHAR(16) = 'ENGINEERING'
+    @DocumentGroup NVARCHAR(16) = '%' -- 'ENGINEERING'
 
 SELECT
     Count = COUNT(*),
@@ -12,9 +12,7 @@ SELECT
     D.chain,
     R.reasonForIssue,
     D.DCS_Criticality,
-    D.DCS_DocumentGroup,
-    DocumentImportStatus = D.INTEGR_REC_STATUS,
-    RevisionImportStatus = R.INTEGR_REC_STATUS
+    D.DCS_DocumentGroup
 FROM
     dbo.ltbl_Import_MuninAibel_Documents D WITH (NOLOCK)
     JOIN dbo.ltbl_Import_MuninAibel_Revisions R WITH (NOLOCK)
@@ -29,8 +27,8 @@ GROUP BY
     D.chain,
     R.reasonForIssue,
     D.DCS_Criticality,
-    D.DCS_DocumentGroup,
-    D.INTEGR_REC_STATUS,
-    R.INTEGR_REC_STATUS
+    D.DCS_DocumentGroup
 ORDER BY
-    Count DESC
+    D.DCS_Domain,
+    D.chain,
+    R.reasonForIssue
