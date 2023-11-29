@@ -1,43 +1,79 @@
 
------------------------------------------------------ ContractNo Mapping --
--- declare @ContractNoMapping table (
---     Domain nvarchar(128),
---     FacilityCodeKey nvarchar(max),
---     OriginatorKey nvarchar(max),
---     ContractNoValue nvarchar(64),
---     MatchingPriority int,
---     Description nvarchar(512)
--- )
--- insert into @ContractNoMapping
--- values
---     -- Yggdrasil
---     ('187', 'FRO', '%', 'C-02145', 1, 'ContractNo based on Domain and FacilityCode'), -- WFL-171972
---     ('128', 'FPQ', '%', 'C-02146', 1, 'ContractNo based on Domain and FacilityCode'),
---     ('128', 'FUI', '%', 'C-02146', 1, 'ContractNo based on Domain and FacilityCode'),
---     ('128', 'IOC', '%', 'C-02146', 1, 'ContractNo based on Domain and FacilityCode'),
---     ('128', 'AAR', '%', 'C-02146', 1, 'ContractNo based on Domain and FacilityCode'), -- WFL-170657
---     ('128', 'BOR', '%', 'C-02146', 1, 'ContractNo based on Domain and FacilityCode'), -- WFL-170657
---     -- PWP-Fenris
---     ('153', '%', '%', 'C-01990', 1, 'ContractNo based on Domain'),
---     ('145', '%', '%', 'C-01989', 1, 'ContractNo based on Domain')
+/**
+ * From XLSL dump
+ */
+declare @PONumberDescriptions table 
+(
+    PONumber nvarchar(max),
+    Description nvarchar(max)
+)
+insert into @PONumberDescriptions
+values
+    ('PACKAGE_NUMBER', 'DESCRIPTION') -- , ...
 
+-------------------------------------------------------------------------------
+
+DECLARE @ValidDomains TABLE
+(
+    Domain NVARCHAR(128)
+)
+insert into @ValidDomains
+values
+    ('145'),
+    ('128'),
+    ('187'),
+    ('153')
+
+-------------------------------------------------------------------------------
+
+/**
+ * Purchase Orders
+ */
+-- INSERT INTO [dbo].[atbl_DCS_PurchaseOrders]
+-- (
+--     Domain,
+--     PONumber,
+--     Description,
+--     CompanyID
+-- )
 SELECT DISTINCT
     Domain = DCS_Domain,
-    ContractNo = DCS_ContractNo,
-    PONumber = DCS_PONumber
-    -- ,facility_code
-    -- ,originator
-    -- ,INTEGR_REC_STATUS
+    PONumber = DCS_PONumber,
+    Description = COALESCE(PONumberDescriptions.Description, 'TBD'),
+    CompanyID = 'Aker Solut'
 FROM
     [dbo].[ltbl_Import_ProArc_Documents] AS D WITH (NOLOCK)
+    LEFT JOIN @PONumberDescriptions PONumberDescriptions
+        ON D.DCS_PONumber = PONumberDescriptions.PONumber
 WHERE
-    DCS_Domain IS NOT NULL
+    DCS_Domain IN (SELECT * FROM @ValidDomains)
     AND DCS_PONumber IS NOT NULL
-    --AND INTEGR_REC_STATUS NOT IN ('OUT_OF_SCOPE')
+    AND DCS_ContractNo IS NOT NULL
 
-and DCS_ContractNo is not null
+-------------------------------------------------------------------------------
 
-order by
-    Domain,
-    ContractNo,
-    PONumber
+/**
+ * Contracts Purchase Orders
+ */
+-- INSERT INTO [dbo].[atbl_DCS_ContractsPurchaseOrders]
+-- (
+--     Domain,
+--     PONumber,
+--     Description,
+--     CompanyID,
+--     ContractNumber
+-- )
+SELECT DISTINCT
+    Domain = DCS_Domain,
+    PONumber = DCS_PONumber,
+    Description = COALESCE(PONumberDescriptions.Description, 'TBD'),
+    CompanyID = 'Aker Solut',
+    ContractNumber = DCS_ContractNo
+FROM
+    [dbo].[ltbl_Import_ProArc_Documents] AS D WITH (NOLOCK)
+    LEFT JOIN @PONumberDescriptions PONumberDescriptions
+        ON D.DCS_PONumber = PONumberDescriptions.PONumber
+WHERE
+    DCS_Domain IN (SELECT * FROM @ValidDomains)
+    AND DCS_PONumber IS NOT NULL
+    AND DCS_ContractNo IS NOT NULL
