@@ -1,0 +1,47 @@
+Chain notes
+
+Check up with Aibel
+
+[state] revision in Pims
+
+1st rev for review
+
+Review Class
+reviewClass
+
+1 Review Required
+2 Not to be Reviewed
+3 Send for Information
+4 Review Required (CR Only)
+D Not to be distibuted
+
+reviewClass logic for DTS
+
+milestone
+interface contract for review
+
+
+warn on SafetyCrit for review without needing review class
+
+safety critical -> review / approval
+
+reviewClass 1
+	1st review
+	reviewStatus ? 
+	after that for with info 
+
+reviewClass 3
+	for info
+
+reviewClass null
+	...
+
+Ref's from Henrik:
+	- Review Status
+	- Review Class
+
+
+OF Status
+
+
+
