@@ -1,5 +1,5 @@
 const pastedDocumentNumbersAndRevisions =
-`` // past the list here
+`` // paste the list here
 
 const sqlValuesString = pastedDocumentNumbersAndRevisions
     .split('\n')
