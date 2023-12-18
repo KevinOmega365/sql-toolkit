@@ -5,13 +5,14 @@
 /**
  * All of the Logic Fields Permutation Counts
  */
-DECLARE @BatchRef UNIQUEIDENTIFIER = '10d56ecb-f34f-4329-9362-94886e7b6bb4'
+DECLARE @BatchRef UNIQUEIDENTIFIER = '0285d00c-da48-41b4-b015-8b97469bb168'
 
 SELECT
     InstanceCount = COUNT(*),
     DCS_Step,
     DCS_Domain,
     DCS_Revision,
+    DCS_DocumentGroup,
     CurrentRevision,
     PrevPimsRevision,
     chain,
@@ -29,6 +30,7 @@ FROM
             ProarcRev.DCS_DocumentID,
             ProarcRev.DCS_Domain,
             ProarcRev.DCS_Revision,
+            ProarcDoc.DCS_DocumentGroup,
             PimsDoc.CurrentRevision,
             PrevPimsRevision = PrevPimsRev.Revision,
             ProarcDoc.chain,
@@ -75,6 +77,7 @@ GROUP BY
     DCS_Step,
     DCS_Domain,
     DCS_Revision,
+    DCS_DocumentGroup,
     CurrentRevision,
     PrevPimsRevision,
     chain,
