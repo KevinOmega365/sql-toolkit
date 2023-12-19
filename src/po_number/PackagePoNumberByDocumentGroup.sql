@@ -18,7 +18,7 @@ SELECT
 FROM
     dbo.ltbl_Import_ProArc_Documents WITH (NOLOCK)
 WHERE
-    DCS_Domain = @FilterDomain
+    DCS_Domain like @FilterDomain
 GROUP BY
     DCS_Domain,
     CASE
@@ -42,7 +42,7 @@ SELECT
 FROM
     dbo.ltbl_Import_MuninAibel_Documents WITH (NOLOCK)
 WHERE
-    DCS_Domain = @FilterDomain
+    DCS_Domain like @FilterDomain
 GROUP BY
     DCS_Domain,
     CASE
@@ -61,7 +61,7 @@ SELECT
 FROM
     dbo.ltbl_Import_ProArc_Documents WITH (NOLOCK)
 WHERE
-    DCS_Domain = @FilterDomain
+    DCS_Domain like @FilterDomain
 GROUP BY
     DCS_Domain,
     package,
@@ -75,7 +75,7 @@ SELECT
 FROM
     dbo.ltbl_Import_MuninAibel_Documents WITH (NOLOCK)
 WHERE
-    DCS_Domain = @FilterDomain
+    DCS_Domain like @FilterDomain
 GROUP BY
     DCS_Domain,
     purchaseOrderNumber,
