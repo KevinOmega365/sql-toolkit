@@ -4,7 +4,8 @@
  */
 declare
     @crlf nchar(2) = CHAR(13)+CHAR(10),
-    @tableName nvarchar(128) = 'atbl_DCS_Documents',
+    @sourceTableName nvarchar(128) = 'atbl_DCS_Documents',
+    @sinkTableName nvarchar(128) = 'ltbl_Import_DTS_DCS_Documents',
     @columnList nvarchar(max) = '[
         "ProgressWeight",
         "Area",
@@ -37,9 +38,9 @@ declare
 
 select
     Statement = -- significant whitespace
-'    IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ''' + @tableName + ''' AND COLUMN_NAME = ''' + ImportColumnName + ''')
+'    IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ''' + @sinkTableName + ''' AND COLUMN_NAME = ''' + ImportColumnName + ''')
     BEGIN
-        ALTER TABLE ' + @tableName + ' ADD [' + ImportColumnName + '] ' + upper(ImportColumnType) + LengthOrPrecision + ' NULL;
+        ALTER TABLE ' + @sinkTableName + ' ADD [' + ImportColumnName + '] ' + upper(ImportColumnType) + LengthOrPrecision + ' NULL;
     END;'
     -- ,* -- debug
 from 
@@ -51,7 +52,7 @@ from
             when ImportColumnType = 'decimal'
                 then '(' + cast(ImportColumnPrecision as nvarchar(max)) + ', ' + cast(ImportColumnScale as nvarchar(max)) + ')'
             when ImportColumnType like '%char'
-                then '(' + cast(ImportColumnMaxLength as nvarchar(max)) + ')'
+                then '(' + ImportColumnMaxLength + ')'
             else ''
             end
         -- ,* -- debug
@@ -60,16 +61,19 @@ from
         select
             ImportColumnName = 'DCS_' + name,
             ImportColumnType = type_name(system_type_id),
-            ImportColumnMaxLength = case
+            ImportColumnMaxLength =
+                case
                 when type_name(system_type_id) like '%char'
                     then case
+                            when max_length = -1
+                                then 'MAX'
                         when type_name(system_type_id) like 'n%'
-                        then max_length / 2
-                        else max_length
+                                then cast(max_length / 2 as nvarchar(max))
+                            else
+                                cast(max_length as nvarchar(max))
                         end
                 else null
-                end
-            ,
+                end,
             ImportColumnPrecision = case
                 when type_name(system_type_id) = 'decimal'
                 then precision
@@ -86,7 +90,7 @@ from
             join openjson(@columnList) ColumnList
                 on ColumnList.value = Columns.name
         where
-            object_id = object_id(@tableName)
+            object_id = object_id(@sourceTableName)
     ) T
 ) U
 
@@ -95,4 +99,4 @@ from
  */
 -- select *
 -- from sys.columns Columns
--- where object_id = object_id(@tableName)
+-- where object_id = object_id(@sourceTableName)
