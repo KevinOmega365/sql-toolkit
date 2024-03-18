@@ -1,5 +1,4 @@
-
-declare @MappingSetID nvarchar(50)=N'UPP DTS - DCS Documents DocumentGroup Mapping'
+declare @MappingSetID nvarchar(50) = N'UPP DTS - DCS Documents DocumentGroup Mapping'
 
 SELECT
     [PrimKey],
