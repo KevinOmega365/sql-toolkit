@@ -3,7 +3,7 @@ declare @MappingSetID nvarchar(50) = N'UPP DTS - DCS Documents Renaming'
 select
     [MappingSetID],
     [Description],
-    [FieldMappingSets] = (
+    [Values] = (
         select
             [MappingSetID],
             [MappingSetValueID],
