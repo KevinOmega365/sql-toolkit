@@ -43,7 +43,8 @@ FROM
 -- select count(distinct JsonRowRef)
 -- from #PersonsDisciplineLeads
 
-select
+insert into dbo.ltbl_Import_SharePointList_OnboardingListItems_STAGING 
+(
     SourceJson,
     LastName,
     FirstName,
@@ -69,6 +70,7 @@ select
     SourceGuid, -- GUID is no longer available
     SharePointListGroupID,
     ID
+)
 select
     SourceJson,
     LastName = json_value(SourceJson, '$.fields.Lastname'),
@@ -86,7 +88,8 @@ select
             ) T
         ), json_value(SourceJson, '$.fields.Discipline_x0020_Lead'))
     ),
-    PersonsDisciplineLeads.DisciplineLeadEmail,
+    DisciplineLeadEmail = PersonsDisciplineLeads.DisciplineLeadEmail,
+    Company = json_value(SourceJson, '$.fields.Company'),
     ProjectIdList = (
     
         select ProjectIdList = '[' + string_agg(LookupId, ', ') within group ( order by LookupId ) + ']'
@@ -95,7 +98,7 @@ select
             from openjson( json_query(SourceJson, '$.fields.Project') ) 
         ) T
     ),
-    PersonsProjects.ProjectID,
+    ProjectID = PersonsProjects.ProjectID,
     OfficeLocation = json_value(SourceJson, '$.fields.Officelocation'),
     SecondaryOfficeLocation = json_value(SourceJson, '$.fields.Secondary_x0020_office_x0020_loc'),
     AccessCardRequired = json_value(SourceJson, '$.fields.Access_x0020_card_x0020_required'),
