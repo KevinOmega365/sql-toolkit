@@ -6,7 +6,7 @@ declare
     @crlf nchar(2) = CHAR(13)+CHAR(10),
     @sourceTableName nvarchar(128) = 'atbl_DCS_Documents',
     @sinkTableName nvarchar(128) = 'ltbl_Import_DTS_DCS_Documents',
-    @columnNamingPrefix nvarchar(8) = 'DCS_'
+    @columnNamingPrefix nvarchar(8) = 'DCS_',
     @columnList nvarchar(max) = '[
         "ProgressWeight",
         "Area",
