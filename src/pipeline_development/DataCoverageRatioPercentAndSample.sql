@@ -5,7 +5,7 @@
 declare
     @tableName nvarchar(128) = 'ltbl_Import_DTS_DCS_Documents',
     @sampleSize int = 5,
-    @percentagePrecision nvarchar(2) = 'P'
+    @percentagePrecision nvarchar(2) = 'P',
     @GroupRef uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0'
 
 --------------------------------------------------------------------------------
