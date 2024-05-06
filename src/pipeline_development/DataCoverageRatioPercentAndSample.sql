@@ -6,6 +6,7 @@ declare
     @tableName nvarchar(128) = 'ltbl_Import_DTS_DCS_Documents',
     @sampleSize int = 5,
     @percentagePrecision nvarchar(2) = 'P'
+    @GroupRef uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0'
 
 --------------------------------------------------------------------------------
 
@@ -38,6 +39,7 @@ select
                     select count(*)
                     from dbo.' + @tableName + ' with (nolock)
                     where ' + name + ' is not null
+                    and INTEGR_REC_GROUPREF = ''' + cast(@GroupRef as nchar(36)) + '''
                 )
                 / ' + @totalRowCountString + '.0,
                 ''' + @percentagePrecision + '''
@@ -48,6 +50,7 @@ select
                     select count(*)
                     from dbo.' + @tableName + ' with (nolock)
                     where ' + name + ' is not null
+                    and INTEGR_REC_GROUPREF = ''' + cast(@GroupRef as nchar(36)) + '''
                 )
                 as nvarchar(max)
             )
@@ -61,6 +64,7 @@ select
                     dbo.' + @tableName + ' with (nolock)
                 where
                     ' + name + ' is not null
+                    and INTEGR_REC_GROUPREF = ''' + cast(@GroupRef as nchar(36)) + '''
             ) = 0 then ''''
             when (
                 select
@@ -69,6 +73,7 @@ select
                     dbo.' + @tableName + ' with (nolock)
                 where
                     ' + name + ' is not null
+                    and INTEGR_REC_GROUPREF = ''' + cast(@GroupRef as nchar(36)) + '''
             ) > ' + cast(@sampleSize as nvarchar(2)) + ' then (
                 select
                     string_agg(' + name + ', '', '')
@@ -85,6 +90,7 @@ select
                                     (nolock)
                                 where
                                     ' + name + ' is not null
+                                    and INTEGR_REC_GROUPREF = ''' + cast(@GroupRef as nchar(36)) + '''
                             ) T
                         order by
                             newid()
@@ -103,6 +109,7 @@ select
                             (nolock)
                         where
                             ' + name + ' is not null
+                            and INTEGR_REC_GROUPREF = ''' + cast(@GroupRef as nchar(36)) + '''
                     ) T
             )
         end'
