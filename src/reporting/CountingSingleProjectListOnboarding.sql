@@ -2,14 +2,14 @@
 /*
  * working table of single JSON records
  */
-DROP TABLE IF EXISTS #JSONROWS DECLARE @ListGroupID INT = 1
+DROP TABLE IF EXISTS #JsonRows DECLARE @ListGroupID INT = 1
 SELECT
-    SOURCEJSON = VALUE,
-    PRIMKEY = NEWID()
+    SourceJSON = VALUE,
+    PrimKey = NEWID()
 INTO
-    #JSONROWS
+    #JsonRows
 FROM
-    DBO.LTBL_IMPORT_SHAREPOINTLIST_ONBOARDINGLISTITEMS_RAW WITH (NOLOCK)
+    dbo.ltbl_Import_SharePointList_OnboardingListItems_RAW WITH (NOLOCK)
     CROSS APPLY OPENJSON (JSON_DATA, '$.value')
 
 /*
@@ -18,38 +18,38 @@ FROM
 SELECT
     COUNT(DISTINCT ID)
 FROM
-    DBO.LTBL_IMPORT_SHAREPOINTLIST_ONBOARDINGLISTITEMS_SINGLEPROJECTLINE WITH (NOLOCK)
+    dbo.ltbl_Import_SharePointList_OnboardingListItems_SingleProjectLine WITH (NOLOCK)
 
 /*
  * expected number of single-project-line rows
  */
 SELECT
-    SUM(PERSONPROJECTCOUNT)
+    SUM(PersonProjectCount)
 FROM
     (
         SELECT
-            PERSONPROJECTCOUNT = (
+            PersonProjectCount = (
                 SELECT
                     COUNT(*)
                 FROM
-                    OPENJSON (JSON_QUERY(SOURCEJSON, '$.fields.Project'))
+                    OPENJSON (JSON_QUERY(SourceJSON, '$.fields.Project'))
             )
         FROM
-            #JSONROWS
+            #JsonRows
     ) T
 
 /*
  * quick random sample
  */
 SELECT
-    TOP 10 PERSONPROJECTCOUNT = (
+    TOP 10 PersonProjectCount = (
         SELECT
             COUNT(*)
         FROM
-            OPENJSON (JSON_QUERY(SOURCEJSON, '$.fields.Project'))
+            OPENJSON (JSON_QUERY(SourceJSON, '$.fields.Project'))
     )
 FROM
-    #JSONROWS
+    #JsonRows
 ORDER BY
     NEWID()
 
@@ -60,18 +60,18 @@ ORDER BY
 SELECT
     COUNT(*)
 FROM
-    #JSONROWS
+    #JsonRows
 
 /*
  * Rollup from the current solution (the count for list group 1 where the
- * persons have not been removed from the source should match the #jsonrows
+ * persons have not been removed from the source should match the #JsonRows
  * count and count of person IDs in the person-project table)
  */
 SELECT
-    SHAREPOINTLISTGROUPID,
-    ISREMOVEDFROMSOURCE,
-    RECORDCOUNT = COUNT(*)
+    SharepointListGroupId,
+    IsRemovedFromSource,
+    RecordCount = COUNT(*)
 FROM
-    DBO.LTBL_IMPORT_SHAREPOINTLIST_ONBOARDINGLISTITEMS WITH (NOLOCK)
+    dbo.ltbl_Import_SharePointList_OnboardingListItems WITH (NOLOCK)
 GROUP BY
-    ROLLUP (SHAREPOINTLISTGROUPID, ISREMOVEDFROMSOURCE)
+    ROLLUP (SharepointListGroupId, IsRemovedFromSource)
