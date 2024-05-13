@@ -23,7 +23,6 @@ declare
         { "sourceColumn" : "DCS_Discipline", "destinationColumn" : "Discipline" },
         { "sourceColumn" : "DCS_ContractNo", "destinationColumn" : "ContractNo" },
         { "sourceColumn" : "DCS_Criticality", "destinationColumn" : "Criticality" },
-        { "sourceColumn" : "DCS_Comments", "destinationColumn" : "Comments" },
         { "sourceColumn" : "DCS_Area", "destinationColumn" : "Area" },
         { "sourceColumn" : "DCS_Confidential", "destinationColumn" : "Confidential" },
         { "sourceColumn" : "DCS_Classification", "destinationColumn" : "Classification" },
