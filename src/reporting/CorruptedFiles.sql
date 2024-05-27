@@ -28,7 +28,10 @@ where
     F.CreatedBy = 'af_Integrations_ServiceUser'
     and F.FileSize < 1000
 order by
-    Domain 
+    F.Domain,
+    F.DocumentID,
+    RevisonAndCurrent,
+    F.OriginalFileName
 
 /**
  * Domains, counts and size samples
