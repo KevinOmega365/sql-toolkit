@@ -3,15 +3,15 @@ select
 from
 (
     select
-        DTS.DCS_Domain,
-        DTS.DCS_DocumentID,
-        PimsLink = '=HYPERLINK(CONCAT("https://pims.akerbp.com/dcs-documents-details?Domain=";C2;"&DocID=";D2);"Open in Pims")',
-        FDM.akerbp_distr,
-        DTS.companyDistribution,
-        DTS.otherCompanyDistributions_CONCATENATED,
-        FDM.distributionflags,
-        FDM.distributionflags_items,
-        DTS.otherCompanyDistributions--,
+        Domain = DTS.DCS_Domain,
+        DocumentID = DTS.DCS_DocumentID,
+        -- PimsLink = '=HYPERLINK(CONCAT("https://pims.akerbp.com/dcs-documents-details?Domain=";A2;"&DocID=";B2);"Open in Pims")',
+        -- FDM.akerbp_distr,
+        -- DTS.companyDistribution,
+        DTS = DTS.otherCompanyDistributions_CONCATENATED,
+        FDM = FDM.distributionflags--,
+        -- FDM.distributionflags_items,
+        -- DTS.otherCompanyDistributions,
         -- AssetCustomText1PimsUiName = 'Aker BP Review (AssetCustomText1)',
         -- DTS_DCS_AssetCustomText1 = DTS.DCS_AssetCustomText1,
         -- FDM_DCS_AssetCustomText1 = FDM.DCS_AssetCustomText1,
@@ -55,3 +55,6 @@ from
         or isnull(DTS.DCS_DocsCustomText2, '') <> isnull(FDM.DCS_DocsCustomText2, '')
         or isnull(DTS.DCS_DocsCustomText1, '') <> isnull(FDM.DCS_DocsCustomText1, '')
 ) T
+order by
+    Domain,
+    DocumentID
