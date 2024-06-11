@@ -7,6 +7,7 @@ SELECT
         from dbo.atbl_Integrations_ScheduledTasksConfigGroups as S with (nolock)
         where S.PrimKey = RF.INTEGR_REC_GROUPREF
     ),
+    RF.file_size,
     F.[Filename] AS FileTableFilename,
     F.FileID AS FileTableFileID,
     F.MD5Hash,
@@ -43,6 +44,7 @@ SELECT
         from dbo.atbl_Integrations_ScheduledTasksConfigGroups as S with (nolock)
         where S.PrimKey = RevisionsFiles.INTEGR_REC_GROUPREF
     ),
+    RevisionsFiles.fileSize,
     RevisionsFiles.md5hash,
     RevisionsFiles.object_guid,
     originalFilename = COALESCE(
