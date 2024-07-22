@@ -1,5 +1,5 @@
-declare @dts_ygg_groupRef uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0'
-declare @fdm_ygg_groupRef uniqueidentifier = '5efd7e52-e187-491c-a9cc-1f8f97eebb70'
+declare @dts_valhall_groupRef uniqueidentifier = '564d970e-8b1a-4a4a-913b-51e44d4bd8e7'
+declare @fdm_PwpFenris_groupRef uniqueidentifier = '8770e32a-670b-499e-bb64-586b147019be'
 
 drop table if exists #CommonDocuments
 drop table if exists #CommonDocumentsRevisions
@@ -20,8 +20,8 @@ from
     join dbo.ltbl_Import_ProArc_Documents FDM with (nolock)
         on DTS.documentNumber = FDM.document_number
 where
-    FDM.INTEGR_REC_GROUPREF = @fdm_ygg_groupRef
-    AND DTS.INTEGR_REC_GROUPREF = @dts_ygg_groupRef
+    FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
+    AND DTS.INTEGR_REC_GROUPREF = @dts_valhall_groupRef
 
 /**
  * Documents and revisions common to DTS and FDM
@@ -57,7 +57,7 @@ from
     left join dbo.ltbl_Import_DTS_DCS_Documents DTS with (nolock)
         on DTS.documentnumber = FDM.document_number
 where
-    FDM.INTEGR_REC_GROUPREF = @fdm_ygg_groupRef
+    FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
     AND DTS.INTEGR_REC_GROUPREF is null
 group by
     FDM.INTEGR_REC_STATUS
@@ -83,7 +83,7 @@ from
         on FdmDocs.document_number = FDM.document_number
 where
     DTS.INTEGR_REC_GROUPREF is null
-    and FDM.INTEGR_REC_GROUPREF = @fdm_ygg_groupRef
+    and FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
 group by
     FDM.INTEGR_REC_STATUS
     , FDM.INTEGR_REC_TRACE
