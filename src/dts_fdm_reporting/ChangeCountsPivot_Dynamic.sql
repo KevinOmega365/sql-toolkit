@@ -2,7 +2,7 @@
 declare
     @whereEqualsClauses nvarchar(max) = '[
         { "tableAlias": "I", "columnName": "INTEGR_REC_STATUS", "columnValue": "ACTION_UPDATE"},
-        { "tableAlias": "I", "columnName": "INTEGR_REC_GROUPREF", "columnValue": "efd3449e-3a44-4c38-b0e7-f57ca48cf8b0"}
+        { "tableAlias": "I", "columnName": "INTEGR_REC_GROUPREF", "columnValue": "564d970e-8b1a-4a4a-913b-51e44d4bd8e7"}
     ]'
 declare
     @sourceTable nvarchar(128) = 'ltbl_Import_DTS_DCS_Documents',
