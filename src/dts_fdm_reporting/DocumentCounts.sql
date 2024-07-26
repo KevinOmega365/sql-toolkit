@@ -1,5 +1,5 @@
-declare @dts_ygg_groupRef uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0'
-declare @fdm_ygg_groupRef uniqueidentifier = '5efd7e52-e187-491c-a9cc-1f8f97eebb70'
+declare @dts_valhall_groupRef uniqueidentifier = '564d970e-8b1a-4a4a-913b-51e44d4bd8e7'
+declare @fdm_PwpFenris_groupRef uniqueidentifier = '8770e32a-670b-499e-bb64-586b147019be'
 
 /**
  * List distinct documents in FDM but not DTS
@@ -11,7 +11,7 @@ from
     left join dbo.ltbl_Import_DTS_DCS_Documents DTS with (nolock)
         on DTS.documentnumber = FDM.document_number
 where
-    FDM.INTEGR_REC_GROUPREF = @fdm_ygg_groupRef
+    FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
     AND DTS.INTEGR_REC_GROUPREF is null
 order by
     FDM.document_number,
@@ -28,7 +28,7 @@ from
     left join dbo.ltbl_Import_DTS_DCS_Documents DTS with (nolock)
         on DTS.documentnumber = FDM.document_number
 where
-    FDM.INTEGR_REC_GROUPREF = @fdm_ygg_groupRef
+    FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
     AND DTS.INTEGR_REC_GROUPREF is null
 
 /**
@@ -43,7 +43,7 @@ from
         on DTS.documentnumber = FDM.document_number
 where
     FDM.INTEGR_REC_GROUPREF is null
-    AND DTS.INTEGR_REC_GROUPREF = @dts_ygg_groupRef
+    AND DTS.INTEGR_REC_GROUPREF = @dts_valhall_groupRef
 
 /**
  * Distinct documents common to FDM and DTS
@@ -56,13 +56,13 @@ from
     join dbo.ltbl_Import_ProArc_Documents FDM with (nolock)
         on DTS.documentnumber = FDM.document_number
 where
-    FDM.INTEGR_REC_GROUPREF = @fdm_ygg_groupRef
-    AND DTS.INTEGR_REC_GROUPREF = @dts_ygg_groupRef
+    FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
+    AND DTS.INTEGR_REC_GROUPREF = @dts_valhall_groupRef
 
 /**
  * Base document counts
  */
-select System = 'DTS', DocumentCount = count(*) from dbo.ltbl_Import_DTS_DCS_Documents with (nolock) where INTEGR_REC_GROUPREF = @dts_ygg_groupRef union all
-select System = 'FDM', DocumentCount = count(*) from dbo.ltbl_Import_ProArc_Documents with (nolock) where INTEGR_REC_GROUPREF = @fdm_ygg_groupRef union all
-select System = 'DTS (distinct DocNo)', DocumentCount = count(distinct documentNumber) from dbo.ltbl_Import_DTS_DCS_Documents with (nolock) where INTEGR_REC_GROUPREF = @dts_ygg_groupRef union all
-select System = 'FDM (distinct DocNo)', DocumentCount = count(distinct document_number) from dbo.ltbl_Import_ProArc_Documents with (nolock) where INTEGR_REC_GROUPREF = @fdm_ygg_groupRef
+select System = 'DTS', DocumentCount = count(*) from dbo.ltbl_Import_DTS_DCS_Documents with (nolock) where INTEGR_REC_GROUPREF = @dts_valhall_groupRef union all
+select System = 'FDM', DocumentCount = count(*) from dbo.ltbl_Import_ProArc_Documents with (nolock) where INTEGR_REC_GROUPREF = @dts_valhall_groupRef union all
+select System = 'DTS (distinct DocNo)', DocumentCount = count(distinct documentNumber) from dbo.ltbl_Import_DTS_DCS_Documents with (nolock) where INTEGR_REC_GROUPREF = @dts_valhall_groupRef union all
+select System = 'FDM (distinct DocNo)', DocumentCount = count(distinct document_number) from dbo.ltbl_Import_ProArc_Documents with (nolock) where INTEGR_REC_GROUPREF = @dts_valhall_groupRef
