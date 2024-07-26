@@ -12,10 +12,10 @@ You can use [PastedDocumentRevisions.js](src/dcs_integration/PastedDocumentRevis
 
 ### Checking DTS against FDM
 
-* [DocumentCounts.sql](src\dts_fdm_reporting\DocumentCounts.sql): ...
+* [AggregateCountsDocsRevsFiles.sql](src/dts_fdm_reporting/AggregateCountsDocsRevsFiles.sql): status and trace and counts for documents, revisions and files not found in the DTS import. Note that missing revisions are only counted for documents common to both imports. Similarly, files are only counted for revisions that are in both the DTS and FDM.
+* [DocumentCounts.sql](src\dts_fdm_reporting\DocumentCounts.sql): Listing of missing documents
 * [RevisionCounts.sql](src\dts_fdm_reporting\RevisionCounts.sql): ...
 * [FileCounts.sql](src\dts_fdm_reporting\FileCounts.sql): ...
-* [AggregateCountsDocsRevsFiles.sql](src/dts_fdm_reporting/AggregateCountsDocsRevsFiles.sql): status and trace and counts for documents, revisions and files not found in the DTS import. Note that missing revisions are only counted for documents common to both imports. Similarly, files are only counted for revisions that are in both the DTS and FDM.
 
 ### New Changes to document profiles
 
