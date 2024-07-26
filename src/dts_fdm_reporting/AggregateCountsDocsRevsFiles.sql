@@ -57,8 +57,9 @@ from
     left join dbo.ltbl_Import_DTS_DCS_Documents DTS with (nolock)
         on DTS.documentnumber = FDM.document_number
 where
-    FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
-    AND DTS.INTEGR_REC_GROUPREF is null
+    DTS.INTEGR_REC_GROUPREF is null
+    and FDM.INTEGR_REC_STATUS not in ('OUT_OF_SCOPE', 'VALIDATION_FAILED')
+    AND FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
 group by
     FDM.INTEGR_REC_STATUS
     , FDM.INTEGR_REC_TRACE
@@ -83,6 +84,7 @@ from
         on FdmDocs.document_number = FDM.document_number
 where
     DTS.INTEGR_REC_GROUPREF is null
+    and FDM.INTEGR_REC_STATUS not in ('OUT_OF_SCOPE', 'VALIDATION_FAILED')
     and FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
 group by
     FDM.INTEGR_REC_STATUS
@@ -110,6 +112,8 @@ from
         and DTS.originalFilename = FDM.original_filename
 where
     DTS.INTEGR_REC_GROUPREF is null
+    and FDM.INTEGR_REC_STATUS not in ('OUT_OF_SCOPE', 'VALIDATION_FAILED')
+    and FDM.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
 group by
     FDM.INTEGR_REC_STATUS
     , FDM.INTEGR_REC_TRACE
