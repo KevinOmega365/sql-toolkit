@@ -25,3 +25,4 @@ A bit less useful
 
 * [ChangeCountsPivot_Dynamic.sql](src/dts_fdm_reporting/ChangeCountsPivot_Dynamic.sql): Column change aggregates
 * [ChangesPerColumn.sql](src/dts_fdm_reporting/ChangesPerColumn.sql): Column change aggregates with to-from values
+* [ChangesPerDocument.sql](src/dts_fdm_reporting/ChangesPerDocument.sql): Each document with "ACTION_UPDATE" with a from and to value for the changing columns
