@@ -1,5 +1,5 @@
 declare
-    @groupRef uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0',
+    @groupRef uniqueidentifier = '564d970e-8b1a-4a4a-913b-51e44d4bd8e7',
     @action_update nvarchar(128) = 'ACTION_UPDATE',
     @dateFormat int = 105
 

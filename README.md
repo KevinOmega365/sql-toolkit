@@ -14,9 +14,12 @@ You can use [PastedDocumentRevisions.js](src/dcs_integration/PastedDocumentRevis
 
 * [AggregateCountsDocsRevsFiles.sql](src/dts_fdm_reporting/AggregateCountsDocsRevsFiles.sql): status and trace and counts for documents, revisions and files not found in the DTS import. Note that missing revisions are only counted for documents common to both imports. Similarly, files are only counted for revisions that are in both the DTS and FDM.
 * [MissingFilesDetails.sql](src/dts_fdm_reporting/MissingFilesDetails.sql): details on revision-files not present in the DTS import, that have a file in Pims.
-* [DocumentCounts.sql](src/dts_fdm_reporting/DocumentCounts.sql): Listing of missing documents
-* [RevisionCounts.sql](src/dts_fdm_reporting/RevisionCounts.sql): ...
-* [FileCounts.sql](src/dts_fdm_reporting/FileCounts.sql): ...
+
+A bit less useful
+
+* [DocumentCounts.sql](src/dts_fdm_reporting/DocumentCounts.sql): Mostly raw counts
+* [RevisionCounts.sql](src/dts_fdm_reporting/RevisionCounts.sql): Mostly raw counts
+* [FileCounts.sql](src/dts_fdm_reporting/FileCounts.sql): Mostly raw counts
 
 ### New Changes to document profiles
 
