@@ -52,7 +52,8 @@ select distinct -- top 50
     DocumentID = RF.document_number,
     Revision = RF.revision,
     OriginalFilename = RF.original_filename,
-    FileCreatedBy = PimsRevisionsFiles.CreatedBy
+    FileCreatedBy = PimsRevisionsFiles.CreatedBy,
+    FileComment = PimsRevisionsFiles.Comment
 
 from 
     -- common documents and revisions from above
@@ -76,7 +77,8 @@ from
             DR.Revision,
             DRF_SF.CRC,
             DRF.Import_ExternalUniqueRef,
-            DRF.CreatedBy
+            DRF.CreatedBy,
+            DRF.Comment
         FROM
             dbo.atbl_DCS_RevisionsFiles AS DRF WITH (NOLOCK)
             INNER JOIN dbo.atbl_DCS_Revisions AS DR WITH (NOLOCK)
@@ -126,6 +128,8 @@ WHERE
     and RF.INTEGR_REC_STATUS = 'IGNORED' -- same as exists clause
     and RF.INTEGR_REC_TRACE like '%"File already exists"%' -- same as exists clause
     and RF.INTEGR_REC_GROUPREF = @fdm_PwpFenris_groupRef
+
+and PimsRevisionsFiles.CreatedBy = 'af_Integrations_ServiceUser'
 
 order by -- newid()
     Domain,
