@@ -53,7 +53,7 @@ select distinct -- top 50
     Revision = RF.revision,
     OriginalFilename = RF.original_filename,
     FileCreatedBy = PimsRevisionsFiles.CreatedBy,
-    FileComment = PimsRevisionsFiles.Comment
+    FileComment = RF.file_comment
 
 from 
     -- common documents and revisions from above
