@@ -1,11 +1,11 @@
-declare @GroupRef uniqueidentifier = '564d970e-8b1a-4a4a-913b-51e44d4bd8e7'
+declare @GroupRef uniqueidentifier = 'edadd424-81ce-4170-b419-12642f80cfde'
 
 /*
  * Entity Status Error Rollup
  */
 select
-    Pipeline,
-    Pipeline = (select Name from dbo.atbl_Integrations_ScheduledTasksConfigGroups G with (nolock) where G.Primkey = EntityStatusError.Pipeline),
+    -- GroupRef,
+    Pipeline = (select Name from dbo.atbl_Integrations_ScheduledTasksConfigGroups G with (nolock) where G.Primkey = EntityStatusError.GroupRef),
     Domain,
     Entity,
     Status,
@@ -14,7 +14,7 @@ select
 from
     (
         select
-            Pipeline = INTEGR_REC_GROUPREF,
+            GroupRef = INTEGR_REC_GROUPREF,
             Domain = DCS_Domain,
             Entity = 'Document',
             Status = INTEGR_REC_STATUS,
@@ -25,7 +25,7 @@ from
         union all
         
         select
-            Pipeline = INTEGR_REC_GROUPREF,
+            GroupRef = INTEGR_REC_GROUPREF,
             Domain = DCS_Domain,
             Entity = 'Revision',
             Status = INTEGR_REC_STATUS,
@@ -36,7 +36,7 @@ from
         union all
         
         select
-            Pipeline = INTEGR_REC_GROUPREF,
+            GroupRef = INTEGR_REC_GROUPREF,
             Domain = DCS_Domain,
             Entity = 'RevisionsFiles',
             Status = INTEGR_REC_STATUS,
@@ -46,10 +46,10 @@ from
     )
     EntityStatusError
 where
-    Pipeline = @GroupRef
+    GroupRef = @GroupRef
 group by rollup
     (
-        Pipeline,
+        GroupRef,
         Domain,
         Entity,
         Status,
