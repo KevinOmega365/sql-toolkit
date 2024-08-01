@@ -48,4 +48,5 @@ $currentDirectory = Get-Location
 # Use Get-ChildItem to recursively search for files containing the search string in their name
 Get-ChildItem -Path $currentDirectory -Recurse -File | Where-Object { $_.Name -like "*$searchString*" } | Select-Object FullName
 ```
+
 Code by ChatGPT (prompt: "Could you write a PowerShell script to search for filenames that contain a given string for the current folder and recursively for all subfolders?")
