@@ -51,6 +51,13 @@ select
     Domain = DCS_Domain,
     DocumentID = DCS_DocumentID,
     Revision = DCS_Revision,
+    CurrentDCSRevision = (
+        select CurrentRevision
+        from dbo.atbl_DCS_Documents DcsD with (nolock)
+        where
+            DcsD.Domain = RF.DCS_Domain
+            and DcsD.DocumentID = RF.DCS_DocumentID
+    ),
     RevisionItemNo = DCS_RevisionItemNo,
     OriginalFileName = DCS_OriginalFileName,
     FileName = DCS_FileName,
