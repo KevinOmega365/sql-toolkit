@@ -79,7 +79,8 @@ select
             and DcsRF.RevisionItemNo = RF.DCS_RevisionItemNo
             and DcsRF.OriginalFileName = RF.DCS_OriginalFileName
 
-    )
+    ),
+    INTEGR_REC_ERROR
 from
     dbo.ltbl_Import_DTS_DCS_RevisionsFiles RF with (nolock)
 where
