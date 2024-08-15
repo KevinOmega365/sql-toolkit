@@ -1,4 +1,3 @@
-
 declare @ErrorPattern nvarchar(max) = '%FAILED%' -- '%FAILED%Closed review exists%'
 
 declare
