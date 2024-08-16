@@ -36,6 +36,7 @@ select
     OriginalFileName = DCS_OriginalFileName,
     FileName = DCS_FileName,
     FileSize = DCS_FileSize,
+    PimFileSise = DcsRF.FileSize,
     FileRef = DCS_FileRef,
     object_guid,
     filePurpose,
@@ -48,7 +49,7 @@ select
     ImportFileSize = DCS_FileSize,
     DcsFileSize = DcsRF.FileSize,
     DcsCreatedBy = DcsRF.CreatedBy,
-    OriginalFileCreated = (select Created from dbo.stbl_System_Files F where F.PrimKey = RF.DCS_FileRef),
+    OriginalFileCreated = (select Created from dbo.stbl_System_Files as F with (nolock) where F.PrimKey = RF.DCS_FileRef),
     DcsFileRef = DcsRF.FileRef,
     ImportFileRef = DCS_FileRef,
     INTEGR_REC_ERROR
