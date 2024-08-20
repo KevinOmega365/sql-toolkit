@@ -18,6 +18,7 @@ select
     Entity,
     Status,
     Error,
+    Trace,
     Count = count(*)
 from
     (
@@ -26,7 +27,8 @@ from
             Domain = DCS_Domain,
             Entity = 'Document',
             Status = INTEGR_REC_STATUS,
-            Error = INTEGR_REC_ERROR
+            Error = INTEGR_REC_ERROR,
+            Trace = INTEGR_REC_TRACE
         from
             dbo.ltbl_Import_DTS_DCS_Documents with (nolock)
         
@@ -37,7 +39,8 @@ from
             Domain = DCS_Domain,
             Entity = 'Revision',
             Status = INTEGR_REC_STATUS,
-            Error = INTEGR_REC_ERROR
+            Error = INTEGR_REC_ERROR,
+            Trace = INTEGR_REC_TRACE
         from
             dbo.ltbl_Import_DTS_DCS_Revisions with (nolock)
         
@@ -48,7 +51,8 @@ from
             Domain = DCS_Domain,
             Entity = 'RevisionsFiles',
             Status = INTEGR_REC_STATUS,
-            Error = INTEGR_REC_ERROR
+            Error = INTEGR_REC_ERROR,
+            Trace = INTEGR_REC_TRACE
         from
             dbo.ltbl_Import_DTS_DCS_RevisionsFiles with (nolock)
     )
@@ -61,5 +65,6 @@ group by rollup
         Domain,
         Entity,
         Status,
-        Error
+        Error,
+        Trace
     )
