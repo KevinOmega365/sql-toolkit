@@ -23,6 +23,18 @@ declare @ltbl_Import_DTS_DCS_RevisionsApprovalTrayItems table
 )
 
 -------------------------------------------------------------------------------
+------------------------------------------------------------------ constants --
+-------------------------------------------------------------------------------
+
+DECLARE @IMPORTED_OK AS NVARCHAR(50) = (SELECT TOP 1 ID FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID='IMPORTED_OK') -- Transition
+DECLARE @TRANSFORMED_OK AS NVARCHAR(50) = (SELECT TOP 1 ID FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID='TRANSFORMED_OK') -- Transition
+DECLARE @VALIDATED_OK AS NVARCHAR(50) = (SELECT TOP 1 ID FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID='VALIDATED_OK') -- Transition
+DECLARE @VALIDATION_FAILED AS NVARCHAR(50) = (SELECT TOP 1 ID FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID='VALIDATION_FAILED') -- Final
+
+DECLARE @TraceBaseJson nvarchar(max) = '{ "action": [], "scope": [], "validation": [], "warning": [] }';
+DECLARE @TraceItem nvarchar(256);
+
+-------------------------------------------------------------------------------
 ---------------------------------------------------------------------- stage --
 -------------------------------------------------------------------------------
 
@@ -64,9 +76,6 @@ from
         on R.Domain = IR.DCS_Domain
         and R.DocumentID = IR.DCS_DocumentID
         and R.Revision = IR.DCS_Revision
-    join dbo.atbl_DCS_Documents D with (nolock)
-        on D.Domain = R.Domain
-        and D.DocumentID = R.DocumentID
     join dbo.atbl_DCS_DistributionSetup as DS with (nolock)
         on DS.Domain = IR.DCS_Domain
         and DS.DocumentID = IR.DCS_DocumentID
@@ -78,26 +87,173 @@ where
 -------------------------------------------------------------------------------
 
 ----------------------------------------------------------- ApprovalDeadline --
-update TrayItems
+update T
 set
     DCS_ApprovalDeadline = [dbo].[afnc_DCS_GetDateDelayedByWorkdays] (
-        TrayItems.DCS_Domain,
+        T.DCS_Domain,
         GETUTCDATE(),
         ISNULL(Constants.DefaultApprovalDeadlineDays, 0),
         ISNULL(Contracts.WorkdaysCalendar, Constants.WorkdaysCalendar)
     )
 from
-    @ltbl_Import_DTS_DCS_RevisionsApprovalTrayItems TrayItems
+    @ltbl_Import_DTS_DCS_RevisionsApprovalTrayItems T
     inner join dbo.atbl_DCS_Constants as Constants with (nolock)
-        on Constants.Domain = TrayItems.DCS_Domain
+        on Constants.Domain = T.DCS_Domain
     left join dbo.atbl_DCS_Contracts as Contracts with (nolock)
-        on Contracts.Domain = TrayItems.DCS_Domain
+        on Contracts.Domain = T.DCS_Domain
 
 -------------------------------------------------------------------------------
 ----------------------------------------------------------------- validation --
 -------------------------------------------------------------------------------
 
--- todo: break down the where clause; add traceable checks
+-------------------------------------------------------------------- IsDraft --
+set @TraceItem = 'Revision is not set to draft'
+UPDATE T
+SET
+    INTEGR_REC_TRACE = JSON_MODIFY(
+        ISNULL(NULLIF(T.INTEGR_REC_TRACE, ''), @TraceBaseJson),
+        'append $.validation',
+        @TraceItem
+    ),
+    INTEGR_REC_STATUS = @VALIDATION_FAILED
+from
+    @ltbl_Import_DTS_DCS_RevisionsApprovalTrayItems as T -- with (nolock)
+    join dbo.atbl_DCS_Revisions as R with (nolock)
+        on R.Domain = T.DCS_Domain
+        and R.DocumentID = T.DCS_DocumentID
+        and R.RevisionItemNo = T.DCS_RevisionItemNo
+where
+    R.IsDraft <> 1
+    -- and I.INTEGR_REC_BATCHREF = @BatchRef
+
+
+----------------------------------------------------- Automatic distribution --
+set @TraceItem = 'Automatic distribution is not configured'
+UPDATE T
+SET
+    INTEGR_REC_TRACE = JSON_MODIFY(
+        ISNULL(NULLIF(T.INTEGR_REC_TRACE, ''), @TraceBaseJson),
+        'append $.validation',
+        @TraceItem
+    ),
+    INTEGR_REC_STATUS = @VALIDATION_FAILED
+from
+    @ltbl_Import_DTS_DCS_RevisionsApprovalTrayItems as T -- with (nolock)
+    join dbo.atbl_DCS_Revisions as R with (nolock)
+        on R.Domain = T.DCS_Domain
+        and R.DocumentID = T.DCS_DocumentID
+        and R.RevisionItemNo = T.DCS_RevisionItemNo
+    join dbo.atbl_DCS_Documents as D with (nolock)
+        on R.Domain = R.Domain
+        and R.DocumentID = R.DocumentID
+    inner join dbo.atbl_DCS_Settings as S with (nolock)
+      on S.Domain = D.Domain
+    left join dbo.atbl_DCS_Contracts as C with (nolock)
+      on C.Domain = D.Domain
+      and C.ContractNo = ISNULL(R.ProjectContractNo, D.ContractNo)
+where
+    (
+        S.AutoPopulateApprovalTrayOnNewRev = 0 -- non-null: OK
+        and C.AutomaticallyDistributeSubmittals = 0 -- non-null: OK
+    )
+    -- and I.INTEGR_REC_BATCHREF = @BatchRef
+
+
+------------------------------------------------------------ RequireApproval --
+set @TraceItem = 'Approval is not required'
+UPDATE T
+SET
+    INTEGR_REC_TRACE = JSON_MODIFY(
+        ISNULL(NULLIF(T.INTEGR_REC_TRACE, ''), @TraceBaseJson),
+        'append $.validation',
+        @TraceItem
+    ),
+    INTEGR_REC_STATUS = @VALIDATION_FAILED
+from
+    @ltbl_Import_DTS_DCS_RevisionsApprovalTrayItems as T -- with (nolock)
+    join dbo.atbl_DCS_Revisions as R with (nolock)
+        on R.Domain = T.DCS_Domain
+        and R.DocumentID = T.DCS_DocumentID
+        and R.RevisionItemNo = T.DCS_RevisionItemNo
+    join dbo.atbl_DCS_Documents as D with (nolock)
+        on R.Domain = R.Domain
+        and R.DocumentID = R.DocumentID
+    INNER JOIN dbo.atbl_DCS_DocumentTypesSteps AS DTS WITH (NOLOCK)
+      ON DTS.Domain = D.Domain
+      AND DTS.PlantID = D.PlantID
+      AND DTS.DocumentType = D.DocumentType
+      AND DTS.Step = R.Step
+where
+    DTS.RequireApproval <> 1 -- todo: handle nulls if they can exist
+    -- and I.INTEGR_REC_BATCHREF = @BatchRef
+
+
+------------------------------------------------------ EnableApprovalProcess --
+set @TraceItem = 'Approval is not process enabled'
+UPDATE T
+SET
+    INTEGR_REC_TRACE = JSON_MODIFY(
+        ISNULL(NULLIF(T.INTEGR_REC_TRACE, ''), @TraceBaseJson),
+        'append $.validation',
+        @TraceItem
+    ),
+    INTEGR_REC_STATUS = @VALIDATION_FAILED
+from
+    @ltbl_Import_DTS_DCS_RevisionsApprovalTrayItems as T -- with (nolock)
+    INNER JOIN dbo.atbl_DCS_Settings AS S WITH (NOLOCK)
+      ON S.Domain = T.DCS_Domain
+where
+    S.EnableApprovalProcess <> 1 -- todo: handle nulls if they can exist
+    -- and I.INTEGR_REC_BATCHREF = @BatchRef
+
+-------------------------------------------------------------------------------
+------------------------------------------------------ EnableApprovalProcess --
+set @TraceItem = 'Approval is not process enabled'
+UPDATE T
+SET
+    INTEGR_REC_TRACE = JSON_MODIFY(
+        ISNULL(NULLIF(T.INTEGR_REC_TRACE, ''), @TraceBaseJson),
+        'append $.validation',
+        @TraceItem
+    ),
+    INTEGR_REC_STATUS = @VALIDATION_FAILED
+from
+    @ltbl_Import_DTS_DCS_RevisionsApprovalTrayItems as T -- with (nolock)
+
+    join dbo.atbl_DCS_Documents as D with (nolock)
+        on R.Domain = R.Domain
+        and R.DocumentID = R.DocumentID
+    join dbo.atbl_DCS_Revisions as R with (nolock)
+        on R.Domain = T.DCS_Domain
+        and R.DocumentID = T.DCS_DocumentID
+        and R.RevisionItemNo = T.DCS_RevisionItemNo
+     JOIN dbo.atbl_DCS_DistributionSetup AS DS WITH (NOLOCK)
+      ON DS.Domain = T.DCS_Domain
+      AND DS.DocumentID = T.DCS_DocumentID
+      AND DS.DistributionType = N'Approval'
+     JOIN dbo.atbl_DCS_DocumentTypesSteps AS DTS WITH (NOLOCK)
+      ON DTS.Domain = D.Domain
+      AND DTS.PlantID = D.PlantID
+      AND DTS.DocumentType = D.DocumentType
+      AND DTS.Step = R.Step
+where
+    isnull(DTS.RequireDistinctDistributionSetup, 0) <> 1
+
+/* todo:
+
+    test intersect code
+
+    find out about these:
+
+        * R.ProjectPlantID,
+        * R.ProjectID,
+        * R.ProjectContractNo
+
+    Are they denormalized?
+    Do we need to start setting them?
+*/
+    -- and I.INTEGR_REC_BATCHREF = @BatchRef
+
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------- testing --
