@@ -23,10 +23,10 @@ TABLE (
 ------------------------------------------------------------------ constants --
 -------------------------------------------------------------------------------
 
-DECLARE @IMPORTED_OK AS NVARCHAR(50) = ( FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID = 'IMPORTED_OK') -- Transition
-DECLARE @TRANSFORMED_OK AS NVARCHAR(50) = ( FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID = 'TRANSFORMED_OK') -- Transition
-DECLARE @VALIDATED_OK AS NVARCHAR(50) = ( FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID = 'VALIDATED_OK') -- Transition
-DECLARE @VALIDATION_FAILED AS NVARCHAR(50) = ( FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID = 'VALIDATION_FAILED') -- Final
+DECLARE @IMPORTED_OK AS NVARCHAR(50) = (SELECT ID FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID = 'IMPORTED_OK') -- Transition
+DECLARE @TRANSFORMED_OK AS NVARCHAR(50) = (SELECT ID FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID = 'TRANSFORMED_OK') -- Transition
+DECLARE @VALIDATED_OK AS NVARCHAR(50) = (SELECT ID FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID = 'VALIDATED_OK') -- Transition
+DECLARE @VALIDATION_FAILED AS NVARCHAR(50) = (SELECT ID FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK) WHERE ID = 'VALIDATION_FAILED') -- Final
 
 DECLARE @TraceBaseJson NVARCHAR(MAX) = '{ "action": [], "scope": [], "validation": [], "warning": [] }';
 DECLARE @TraceItem NVARCHAR(256);
