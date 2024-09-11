@@ -3,10 +3,15 @@
  */
 
 declare
-    @tableName nvarchar(128) = 'ltbl_Import_DTS_DCS_Documents',
+    @docTable nvarchar(128) = 'ltbl_Import_DTS_DCS_Documents',
+    @revTable nvarchar(128) = 'ltbl_Import_DTS_DCS_Revisions',
+    @revFileTable nvarchar(128) = 'ltbl_Import_DTS_DCS_RevisionsFiles'
+
+declare
+    @tableName nvarchar(128) = @revFileTable,
     @sampleSize int = 5,
     @percentagePrecision nvarchar(2) = 'P',
-    @GroupRef uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0'
+    @GroupRef uniqueidentifier = 'fb36536c-db59-4926-952a-5868262a44a5'
 
 --------------------------------------------------------------------------------
 
@@ -15,7 +20,8 @@ declare
     @totalRowCountString nvarchar(max),
     @getTotalRowCount nvarchar(max) = 
         'select @n = count(*)
-        from dbo.' + @tableName + ' with (nolock)'
+        from dbo.' + @tableName + ' with (nolock)
+        where INTEGR_REC_GROUPREF = ''' + cast(@GroupRef as nchar(36)) + ''''
 exec sp_executesql
     @getTotalRowCount,
     N'@n int out',
