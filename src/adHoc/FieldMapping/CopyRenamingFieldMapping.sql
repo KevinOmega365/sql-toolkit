@@ -17,17 +17,17 @@ declare
     @SourceGroupRef uniqueidentifier = @Yggdrasil,
     @SinkGroupRef uniqueidentifier = @Subsea
 
-INSERT INTO dbo.atbl_Integrations_Configurations_FieldMappingSets_Subscribers
-(
-    [MappingSetID],
-    [GroupRef],
-    [TargetTable],
-    [CriteriaField1],
-    [CriteriaField2],
-    [FromField],
-    [ToField],
-    [Required]
-)
+-- INSERT INTO dbo.atbl_Integrations_Configurations_FieldMappingSets_Subscribers
+-- (
+--     [MappingSetID],
+--     [GroupRef],
+--     [TargetTable],
+--     [CriteriaField1],
+--     [CriteriaField2],
+--     [FromField],
+--     [ToField],
+--     [Required]
+-- )
 SELECT
     [MappingSetID],
     [GroupRef] = @SinkGroupRef,
@@ -38,7 +38,7 @@ SELECT
     [ToField],
     [Required]
 FROM
-    dbo.atbl_Integrations_Configurations_FieldMappingSets_Subscribers AS S
+    dbo.atbl_Integrations_Configurations_FieldMappingSets_Subscribers AS S WITH (NOLOCK)
 WHERE
     [MappingSetID] = @MappingSetID
     and GroupRef = @SourceGroupRef
