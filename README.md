@@ -13,7 +13,9 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 * [CheckRevisionsWithoutFiles.sql](src/reporting/CheckRevisionsWithoutFiles.sql): get a quick yes/no on metadata and "physical" file existence
 
-### Checking New Pipelines
+## Checking New Pipelines
+
+### Counts and Data Quality
 
 * [DataCounts_DTS.sql](src/pipeline_development/DataCounts_DTS.sql): Quick counts across tables import tables
 * [DataCoverageRatioPercentAndSample.sql](src/pipeline_development/DataCoverageRatioPercentAndSample.sql): Data coverage and sample
