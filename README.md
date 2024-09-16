@@ -13,16 +13,10 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 * [CheckRevisionsWithoutFiles.sql](src/reporting/CheckRevisionsWithoutFiles.sql): get a quick yes/no on metadata and "physical" file existence
 
-### Checking DTS against FDM
+### Checking New Pipelines
 
-* [AggregateCountsDocsRevsFiles.sql](src/dts_fdm_reporting/AggregateCountsDocsRevsFiles.sql): status and trace and counts for documents, revisions and files not found in the DTS import. Note that missing revisions are only counted for documents common to both imports. Similarly, files are only counted for revisions that are in both the DTS and FDM.
-* [MissingFilesDetails.sql](src/dts_fdm_reporting/MissingFilesDetails.sql): details on revision-files not present in the DTS import, that have a file in Pims.
-
-A bit less useful
-
-* [DocumentCounts.sql](src/dts_fdm_reporting/DocumentCounts.sql): Mostly raw counts
-* [RevisionCounts.sql](src/dts_fdm_reporting/RevisionCounts.sql): Mostly raw counts
-* [FileCounts.sql](src/dts_fdm_reporting/FileCounts.sql): Mostly raw counts
+* [DataCounts_DTS.sql](src/pipeline_development/DataCounts_DTS.sql): Quick counts across tables import tables
+* [DataCoverageRatioPercentAndSample.sql](src/pipeline_development/DataCoverageRatioPercentAndSample.sql): Data coverage and sample
 
 ### New Changes to document profiles
 
@@ -33,6 +27,8 @@ A bit less useful
 * [ChangesPerDocument_Valhall_VoidedDate.sql](src/dts_fdm_reporting/ChangesPerDocument_Valhall_VoidedDate.sql): Valhall specific document voided date change details
 
 ## Finding scripts in this dumster fire
+
+Use the search functionality in github.com ```repo:KevinOmega365/sql-toolkit YOUR_SEARCH_TERMS_HERE```
 
 If you have a local copy of this repository you can search for files by name with PowerShell
 
