@@ -5,7 +5,11 @@ DECLARE
 
 SELECT
     [Pipeline].[Name],
-    [TimeOfDay] = CONVERT(NVARCHAR(5), [Schedule].[TimeOfDay], 108)
+    [TimeOfDay] = CONVERT(
+        NVARCHAR(5),
+        DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), [Schedule].[TimeOfDay]), -- adjust for UTC time
+        108
+    )
 FROM
     [dbo].[aviw_Integrations_ScheduledTasksConfigGroups] [Pipeline]
     JOIN [dbo].[atbv_Integrations_ScheduledTasksConfigGroupsSchedules] [Schedule]
