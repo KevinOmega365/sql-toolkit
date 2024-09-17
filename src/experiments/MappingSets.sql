@@ -1,22 +1,25 @@
 
-declare
-    @IvarAasen uniqueidentifier = 'f6c3687c-5511-48f2-98e5-8e84eee9b689',
-    @Munin uniqueidentifier = 'e1a66f7c-ab9b-4586-aa71-4b4cab743aa2',
-    @Valhall uniqueidentifier = '564d970e-8b1a-4a4a-913b-51e44d4bd8e7',
-    @Yggdrasil uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0',
-    @Subsea uniqueidentifier = 'fb36536c-db59-4926-952a-5868262a44a5',
-    @EdvardGrieg uniqueidentifier = 'edadd424-81ce-4170-b419-12642f80cfde'
+DECLARE
+    @IvarAasen UNIQUEIDENTIFIER = 'f6c3687c-5511-48f2-98e5-8e84eee9b689',
+    @Munin UNIQUEIDENTIFIER = 'e1a66f7c-ab9b-4586-aa71-4b4cab743aa2',
+    @Valhall UNIQUEIDENTIFIER = '564d970e-8b1a-4a4a-913b-51e44d4bd8e7',
+    @Yggdrasil UNIQUEIDENTIFIER = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0',
+    @Subsea UNIQUEIDENTIFIER = 'fb36536c-db59-4926-952a-5868262a44a5',
+    @EdvardGrieg UNIQUEIDENTIFIER = 'edadd424-81ce-4170-b419-12642f80cfde'
 
-declare @GroupRef nvarchar(36) = @Subsea
+DECLARE @GroupRef NVARCHAR(36) = @Subsea
 
 -------------------------------------------------------------------------------
+----------------------------------------------- Break into normalized tables --
+-------------------------------------------------------------------------------
 
-declare @Pipelines table
+------------------------------------------------------------------ Pipelines --
+DECLARE @Pipelines TABLE
 (
-    PrimKey uniqueidentifier,
-    Name nvarchar(128)
+    PrimKey UNIQUEIDENTIFIER,
+    Name NVARCHAR(128)
 )
-insert into @Pipelines
+INSERT INTO @Pipelines
 SELECT DISTINCT
     [GroupRef],
     [Name]
@@ -25,41 +28,32 @@ FROM
 WHERE
     [GroupRef] = @GroupRef
 
-select * from @Pipelines
+-- SELECT * FROM @Pipelines
 
--------------------------------------------------------------------------------
-
-declare @MappingSetsKeys table
+---------------------------------------------------------------- MappingSets --
+DECLARE @MappingSets TABLE
 (
-    MappingSetRef uniqueidentifier
+    PrimKey UNIQUEIDENTIFIER, -- not null
+    Name NVARCHAR(128), -- not null
+    -- todo add "Description"
+    MappingType NVARCHAR(128), -- not null: { 'ValueMapping' | 'Renaming' }
+    TableName NVARCHAR(128) -- not null
 )
-
-declare @MappingSets table
-(
-    PrimKey uniqueidentifier, -- not null
-    Name nvarchar(128), -- not null
-    MappingType nvarchar(128), -- not null: { 'ValueMapping' | 'Renaming' }
-    TableName nvarchar(128) -- not null
-)
-insert into @MappingSets
+INSERT INTO @MappingSets
 (
     PrimKey,
     Name,
     MappingType,
     TableName
 )
-output
-    INSERTED.PrimKey
-into
-    @MappingSetsKeys
 SELECT
     PrimKey = newid(),
     Name = [MappingSetID],
     [MappingType] = case
-        when MappingSetID like '%Mapping' then 'Mapping'
-        when MappingSetID like '%Renaming' then 'Renaming'
-        else MappingType
-    end,
+        WHEN MappingSetID LIKE '%Mapping' THEN 'Mapping'
+        WHEN MappingSetID LIKE '%Renaming' THEN 'Renaming'
+        ELSE MappingType
+    END,
     TableName = [TargetTable]
 FROM
     [dbo].[aviw_Integrations_Configurations_FieldMappingSets_GroupFieldMappings]
@@ -70,21 +64,20 @@ GROUP BY
     TargetTable,
     MappingType
 
-select * from @MappingSets
+-- SELECT * FROM @MappingSets
 
--------------------------------------------------------------------------------
-
-declare @PipelinesMappingSets table
+------------------------------------------------------- PipelinesMappingSets --
+DECLARE @PipelinesMappingSets TABLE
 (
-    GroupRef uniqueidentifier, -- not null
-    MappingRef uniqueidentifier, -- not null
-    Priority int -- not null: default = 1 // used to support dependencies (e.g., DCS_Domain value is needed)
+    GroupRef UNIQUEIDENTIFIER, -- not null
+    MappingSetRef UNIQUEIDENTIFIER, -- not null
+    PriorityOrder INT -- not null: default = 1 // used to support dependencies (e.g., DCS_Domain value is needed)
 )
-insert into @PipelinesMappingSets
-select
+INSERT INTO @PipelinesMappingSets
+SELECT
     GroupRef,
-    MappingRef = MS.PrimKey,
-    ROW_NUMBER() OVER (ORDER BY MS.PrimKey) -- this would get set by hand
+    MappingSetRef = MS.PrimKey,
+    PriorityOrder = 1 -- this would get set by hand
 FROM
     [dbo].[aviw_Integrations_Configurations_FieldMappingSets_GroupFieldMappings] GFM
     join @MappingSets MS
@@ -95,19 +88,18 @@ GROUP BY
     GroupRef,
     MS.PrimKey
 
-select * from @PipelinesMappingSets
+-- SELECT * FROM @PipelinesMappingSets
 
--------------------------------------------------------------------------------
-
-declare @ValueMappings table
+-------------------------------------------------------------- ValueMappings --
+DECLARE @ValueMappings TABLE
 (
-    PrimKey uniqueidentifier, -- not null
-    InputValueOne nvarchar(max), -- null
-    InputValueTwo nvarchar(max), -- null
-    InputValueThree nvarchar(max), -- null
-    OutputValue nvarchar(max) -- not null
+    PrimKey UNIQUEIDENTIFIER, -- not null
+    InputValueOne NVARCHAR(max), -- null
+    InputValueTwo NVARCHAR(max), -- null
+    InputValueThree NVARCHAR(max), -- null
+    OutputValue NVARCHAR(max) -- not null
 )
-insert into @ValueMappings
+INSERT INTO @ValueMappings
 (
     PrimKey,
     InputValueOne,
@@ -115,35 +107,34 @@ insert into @ValueMappings
     InputValueThree,
     OutputValue
 )
-select
+SELECT
     PrimKey = newid(),
+    FromValue,
     CriteriaValue1,
     CriteriaValue2,
-    FromValue,
     ToValue
 FROM
     [dbo].[aviw_Integrations_Configurations_FieldMappingSets_GroupFieldMappings] GFM
 WHERE
     [GroupRef] = @GroupRef
 GROUP BY
+    FromValue,
     CriteriaValue1,
     CriteriaValue2,
-    FromValue,
     ToValue
 
--- select * from @ValueMappings
+-- SELECT * FROM @ValueMappings
 
--------------------------------------------------------------------------------
-
-declare @FieldMappings table
+-------------------------------------------------------------- FieldMappings --
+DECLARE @FieldMappings TABLE
 (
-    PrimKey uniqueidentifier, -- not null
-    InputFieldOne nvarchar(128), -- not null
-    InputFieldTwo nvarchar(128), -- null
-    InputFieldThree nvarchar(128), -- null
-    OutputField nvarchar(128) -- not null
-) 
-insert into @FieldMappings
+    PrimKey UNIQUEIDENTIFIER, -- not null
+    InputFieldOne NVARCHAR(128), -- not null
+    InputFieldTwo NVARCHAR(128), -- null
+    InputFieldThree NVARCHAR(128), -- null
+    OutputField NVARCHAR(128) -- not null
+)
+INSERT INTO @FieldMappings
 (
     PrimKey,
     InputFieldOne,
@@ -151,33 +142,133 @@ insert into @FieldMappings
     InputFieldThree,
     OutputField
 )
-select
+SELECT
     PrimKey = newid(),
+    FromField,
     CriteriaField1,
     CriteriaField2,
-    FromField,
     ToField
 FROM
     [dbo].[aviw_Integrations_Configurations_FieldMappingSets_GroupFieldMappings] GFM
 WHERE
     [GroupRef] = @GroupRef
 GROUP BY
+    FromField,
     CriteriaField1,
     CriteriaField2,
-    FromField,
     ToField
 
--- select * from @FieldMappings
+-- SELECT * FROM @FieldMappings
 
--------------------------------------------------------------------------------
-
-declare @MappingSetsMappings table
+-------------------------------------------------------- MappingSetsMappings --
+DECLARE @MappingSetsMappings TABLE
 (
-    MappingSetRef uniqueidentifier, -- not null
-    FieldMappingRef uniqueidentifier, -- not null
-    ValueMappingRef uniqueidentifier -- null
+    MappingSetRef UNIQUEIDENTIFIER, -- not null
+    FieldMappingRef UNIQUEIDENTIFIER, -- not null
+    ValueMappingRef UNIQUEIDENTIFIER -- null
 )
-
--- todo: it!
+INSERT INTO @MappingSetsMappings
+(
+    MappingSetRef,
+    FieldMappingRef,
+    ValueMappingRef
+)
+SELECT
+    MappingSetRef = (select Primkey from @MappingSets MS where MS.Name = GFM.MappingSetID),
+    FieldMappingRef = (
+        select Primkey
+        from @FieldMappings FM
+        where
+            isnull(FM.InputFieldOne, '') = isnull(GFM.FromField, '')
+            and isnull(FM.InputFieldTwo, '') = isnull(GFM.CriteriaField1, '')
+            and isnull(FM.InputFieldThree, '') = isnull(GFM.CriteriaField2, '')
+            and isnull(FM.OutputField, '') = isnull(GFM.ToField, '')
+    ),
+    ValueMappingRef = (
+        select PrimKey
+        from @ValueMappings VM
+        where
+            isnull(VM.InputValueOne, '') = isnull(GFM.FromValue, '')
+            and isnull(VM.InputValueTwo, '') = isnull(GFM.CriteriaValue1, '')
+            and isnull(VM.InputValueThree, '') = isnull(GFM.CriteriaValue2, '')
+            and isnull(VM.OutputValue, '') = isnull(GFM.ToValue, '')
+    )
+FROM
+    [dbo].[aviw_Integrations_Configurations_FieldMappingSets_GroupFieldMappings] GFM
+WHERE
+    [GroupRef] = @GroupRef
 
 -------------------------------------------------------------------------------
+-------------------------------------------------------- Reassemble and Test --
+-------------------------------------------------------------------------------
+/*
+ * Original Mapping
+ */
+SELECT
+    CriteriaField1,
+    CriteriaField2,
+    CriteriaValue1,
+    CriteriaValue2,
+    -- Description, -- todo: add this in
+    FromField,
+    FromValue,
+    GroupRef,
+    MappingSetID,
+    -- MappingSetValueID, -- not used in the refactored version
+    MappingType,
+    Name,
+    PriorityOrder,
+    -- Required, -- todo: add this in
+    TargetTable,
+    ToField,
+    ToValue
+FROM
+    [dbo].[aviw_Integrations_Configurations_FieldMappingSets_GroupFieldMappings] GFM
+WHERE
+    [GroupRef] = @GroupRef
+order by
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+
+/*
+ * Refactored Mapping
+ */
+select
+    FM.InputFieldTwo,
+    FM.InputFieldThree,
+    VM.InputValueTwo,
+    VM.InputValueThree,
+    -- Description, -- todo: add this in
+    FM.InputFieldOne,
+    VM.InputValueOne,
+    P.PrimKey,
+    MappingSetName = MS.Name,
+    -- MappingSetValueID, -- this does not exist
+    MS.MappingType,
+    PiplelineName = P.Name,
+    PMS.PriorityOrder,
+    -- Required, -- todo: add this in
+    MS.TableName,
+    FM.OutputField,
+    VM.OutputValue
+from
+    @Pipelines P
+    join @PipelinesMappingSets PMS
+        on PMS.GroupRef = P.PrimKey
+    join @MappingSets MS
+        on MS.PrimKey = PMS.MappingSetRef
+    join @MappingSetsMappings MSM
+        on MSM.MappingSetRef = PMS.MappingSetRef
+    join @ValueMappings VM
+        on VM.PrimKey = MSM.ValueMappingRef
+    join @FieldMappings FM
+        on FM.PrimKey = MSM.FieldMappingRef
+WHERE
+    P.PrimKey = @GroupRef
+order by
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+-- select * from @Pipelines
+-- select * from @MappingSets
+-- select * from @PipelinesMappingSets
+-- select * from @ValueMappings
+-- select * from @FieldMappings
+-- select * from @MappingSetsMappings
