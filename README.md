@@ -4,6 +4,10 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 ## Quick Links
 
+### DTS - DCS Overview
+
+* [PipelinesStartTimes.sql](src/dcs_integration/PipelinesStartTimes.sql): Pipeline start times.
+
 ### Check up on import status of particular documents
 
 * [CheckDtsDocumentImport.sql](src/dcs_integration/CheckDtsDocumentImport.sql): find whether a set of documents and revisions are present in the import data and/or in Pims DCS.
