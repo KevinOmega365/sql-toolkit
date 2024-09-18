@@ -174,7 +174,13 @@ INSERT INTO @MappingSetsMappings
     ValueMappingRef
 )
 SELECT
-    MappingSetRef = (select Primkey from @MappingSets MS where MS.Name = GFM.MappingSetID),
+    MappingSetRef = (
+        select Primkey
+        from @MappingSets MS
+        where
+            MS.Name = GFM.MappingSetID
+        and MS.TableName = GFM.TargetTable
+    ),
     FieldMappingRef = (
         select Primkey
         from @FieldMappings FM
