@@ -168,7 +168,7 @@ GROUP BY
 
 -------------------------------------------------------- MappingApplications --
 -- todo: extract GroupRef (?)
-DECLARE @MappingsApplications TABLE
+DECLARE @MappingsInstances TABLE
 (
     PrimKey UNIQUEIDENTIFIER, -- not null
     GroupRef UNIQUEIDENTIFIER, -- not null
@@ -177,7 +177,7 @@ DECLARE @MappingsApplications TABLE
     FieldMappingRef UNIQUEIDENTIFIER, -- not null
     Required BIT -- not null | default (0)
 )
-INSERT INTO @MappingsApplications
+INSERT INTO @MappingsInstances
 (
     PrimKey,
     GroupRef,
@@ -264,20 +264,20 @@ select
     PiplelineName = P.Name,
     M.PriorityOrder,
     Required,
-    MA.TargetTable,
+    MI.TargetTable,
     FM.OutputField,
     VM.OutputValue
 from
     @Pipelines P
-    join @MappingsApplications MA
-        on MA.GroupRef = P.PrimKey
+    join @MappingsInstances MI
+        on MI.GroupRef = P.PrimKey
     join @Mappings M
-        on M.PrimKey = MA.MappingRef
+        on M.PrimKey = MI.MappingRef
     join @MappingValueMappings MVM
         on MVM.MappingsRef = M.PrimKey
     join @ValueMappings VM
         on VM.PrimKey = MVM.ValueMappingRef
     join @FieldMappings FM
-        on FM.PrimKey = MA.FieldMappingRef
+        on FM.PrimKey = MI.FieldMappingRef
 order by
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
