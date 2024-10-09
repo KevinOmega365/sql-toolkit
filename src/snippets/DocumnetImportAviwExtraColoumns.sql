@@ -12,8 +12,7 @@
                 ),
                 T.INTEGR_REC_STATUS
             )
-    FROM
-        dbo.{{YOUR_TABLE_HERE}} AS T WITH(NOLOCK)
+    FROM dbo.{{YOUR_TABLE_HERE}} AS T WITH(NOLOCK)
         LEFT JOIN [dbo].[atbl_DCS_Documents] AS D WITH (NOLOCK)
-            ON D.[Domain] = T.[DCS_Domain]
-            AND D.[DocumentID] = T.[DCS_DocumentID]
+        ON D.[Domain] = T.[DCS_Domain]
+        AND D.[DocumentID] = T.[DCS_DocumentID]
