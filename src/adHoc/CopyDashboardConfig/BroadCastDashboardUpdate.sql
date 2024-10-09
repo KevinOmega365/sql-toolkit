@@ -62,6 +62,7 @@ WHERE
     PGQS.GroupRef = @SourceGroupRef
 
 ------------------------------------------------------- generate new configs --
+-- UPDATE DI SET DI.Config = replace(replace(@SourceConfig, @SourceGroupRef, PGQS.GroupRef), @SourceQuerySystem, PGQS.QuerySystem)
 SELECT
     PGQS.Name,
     OriginalConfig = DI.Config,
