@@ -127,5 +127,11 @@ group by rollup
         Error,
         Trace
     )
+order by
+    Pipeline,
+    Domain,
+    Entity,
+    Status,
+    Error
 
 -- for json auto
