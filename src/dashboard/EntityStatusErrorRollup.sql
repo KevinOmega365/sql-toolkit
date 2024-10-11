@@ -6,7 +6,8 @@ declare
     @Yggdrasil uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0',
     @EdvardGrieg uniqueidentifier = 'edadd424-81ce-4170-b419-12642f80cfde'
 
-declare @GroupRef uniqueidentifier = @Valhall
+declare @GroupRef nvarchar(36) = '%'
+declare @ErrorPattern nvarchar(256) = '%parent%'
 
 /*
  * Entity Status Error Rollup
@@ -58,7 +59,8 @@ from
     )
     EntityStatusError
 where
-    GroupRef = @GroupRef
+    GroupRef like @GroupRef
+    and Error like @ErrorPattern
 group by rollup
     (
         GroupRef,
