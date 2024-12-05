@@ -1,3 +1,12 @@
+/*
+ * Check the mailn sending settings
+ */
+-- SELECT S.DisableSMSAndEmailSending
+-- FROM dbo.stbl_Database_Setup AS S
+
+/*
+ * Force send a message
+ */
 -- insert into dbo.stbl_Mail_SimpleMessages(
 --     ForceSending,
 --     FromEmail,
@@ -29,4 +38,7 @@
 -- &nbsp;&nbsp;&nbsp;&nbsp;Pims
 -- '
 
+/*
+ * Peek at the mail queue
+ */
 select top 50 * from dbo.stbl_Mail_SimpleMessages order by Created desc
