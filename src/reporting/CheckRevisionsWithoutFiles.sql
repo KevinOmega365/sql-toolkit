@@ -1,4 +1,11 @@
-declare @groupRef uniqueidentifier = 'edadd424-81ce-4170-b419-12642f80cfde'
+declare
+    @IvarAasen uniqueidentifier = 'f6c3687c-5511-48f2-98e5-8e84eee9b689',
+    @Munin uniqueidentifier = 'e1a66f7c-ab9b-4586-aa71-4b4cab743aa2',
+    @Valhall uniqueidentifier = '564d970e-8b1a-4a4a-913b-51e44d4bd8e7',
+    @Yggdrasil uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0',
+    @EdvardGrieg uniqueidentifier = 'edadd424-81ce-4170-b419-12642f80cfde'
+
+declare @GroupRef nvarchar(36) = @Munin -- '%'
 
 /*
  * missing 
@@ -48,7 +55,7 @@ from
         and D.DocumentID = R.DCS_DocumentID
 where
     R.INTEGR_REC_ERROR = 'Quallity Failure: Revision without Files'
-    and R.INTEGR_REC_GROUPREF = @groupRef
+    and R.INTEGR_REC_GROUPREF like @groupRef
 order by
     R.DCS_Domain,
     R.DCS_DocumentID,
