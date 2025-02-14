@@ -1,4 +1,3 @@
-CREATE OR ALTER PROC [dbo].[astp_Tge_AzureAdUsers_SyncPersonsWithStaging] AS
 
     DECLARE @RunID UNIQUEIDENTIFIER = NEWID()
 
