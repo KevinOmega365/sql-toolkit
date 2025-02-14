@@ -239,14 +239,16 @@
                     AND PU.External_ID = P.ADAccount
                     AND PU.WebSite = @WebSite
             )
-    UNION
-        select
-            null AS Person_ID,
-            'Office 365' AS UserType,
-            ADAccount AS External_ID,
-            @WebSite AS WebSite
-        from
-            #NewUsers
+
+        union
+
+            select
+                null AS Person_ID,
+                'Office 365' AS UserType,
+                ADAccount AS External_ID,
+                @WebSite AS WebSite
+            from
+                #NewUsers
     ---------------------------------------------- Insert PersonsUsers [END] --
 
     ----------------------------------------------- Grant Role Access [START]--
@@ -264,12 +266,12 @@
         #RolesToGrant
     FROM
         (
-            SELECT
-                P.OrgUnit_ID,
-                R.Role_ID,
-                Person_ID = P.ID,
-                Comment = 'Granted by Azure AD Import'
-            FROM
+                SELECT
+                    P.OrgUnit_ID,
+                    R.Role_ID,
+                    Person_ID = P.ID,
+                    Comment = 'Granted by Azure AD Import'
+                FROM
                     dbo.stbl_System_Persons P
                     JOIN dbo.atbl_TGE_AzureAdUsers_Staging S
                         ON S.AzureID = TRY_CONVERT(UNIQUEIDENTIFIER, ADAccount)
@@ -278,6 +280,24 @@
                         AND P.Email like '%@' + GOU.EmailDomain -- org unit is based user email domain
                     JOIN dbo.atbl_TGE_AzureAdGroupsOrgUnitsRoles R
                         ON R.AzureAdGroupsOrgUnits_ID = GOU.ID
+
+            union
+
+                select
+                    N.OrgUnit_ID,
+                    R.Role_ID,
+                    Person_ID = null,
+                    Comment = 'Granted by Azure AD Import'
+                from
+                    #NewUsers N
+                    JOIN dbo.atbl_TGE_AzureAdUsers_Staging S
+                        ON S.AzureID = TRY_CONVERT(UNIQUEIDENTIFIER, ADAccount)
+                    JOIN dbo.atbl_TGE_AzureAdGroupsOrgUnits GOU
+                        ON N.OrgUnit_ID = GOU.OrgUnit_ID
+                        AND N.Email like '%@' + GOU.EmailDomain -- org unit is based user email domain
+                    JOIN dbo.atbl_TGE_AzureAdGroupsOrgUnitsRoles R
+                        ON R.AzureAdGroupsOrgUnits_ID = GOU.ID
+            
         ) I
         LEFT JOIN dbo.stbl_System_OrgUnitsRoles OUR
             ON OUR.OrgUnit_ID = I.OrgUnit_ID
@@ -288,10 +308,10 @@
 
     ------------------------------------------------ Grant Role Access [END] --
 
-    -- select * from #NewUsers
-    -- select * from #ExcludedUsersLogMessages
-    -- select * from #UsersToExpire
-    -- select * from #UsersToRevivify
-    -- select * from #UsersToUpdate
-    -- select * from #LoginsToCreate
-    -- select * from #RolesToGrant
+    select * from #NewUsers
+    select * from #ExcludedUsersLogMessages
+    select * from #UsersToExpire
+    select * from #UsersToRevivify
+    select * from #UsersToUpdate
+    select * from #LoginsToCreate
+    select * from #RolesToGrant
