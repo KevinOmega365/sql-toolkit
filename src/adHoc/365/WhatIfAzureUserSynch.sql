@@ -1,15 +1,6 @@
 
     DECLARE @RunID UNIQUEIDENTIFIER = NEWID()
 
-    ------------------------------------------------- Reload Staging [START] --
-    IF NOT EXISTS (SELECT * FROM dbo.atbl_Tge_AzureAdUsers_Raw)
-    BEGIN
-        EXEC dbo.afThrow 'atbl_Tge_AzureAdUsers_Raw is empty' RETURN;
-    END
-
-    EXEC dbo.astp_Tge_AzureAdUsers_ReloadStaging
-    --------------------------------------------------- Reload Staging [END] --
-
     ------------------------------------- Get new persons from azure [START] --
     DROP TABLE IF EXISTS #NewUsers;
     
@@ -23,6 +14,9 @@
         DTJson NVARCHAR(max)
     )
 
+    /*
+     * Collect list
+     */
     INSERT INTO #NewUsers (
         ADAccount,
         Email,
@@ -64,11 +58,55 @@
         )
     --------------------------------------- Get new persons from azure [END] --
 
+    --------------------------------------------- Log Excluded Users [Start] --
+    DROP TABLE IF EXISTS #ExcludedUsersLogMessages;
+    CREATE TABLE #ExcludedUsersLogMessages (LogMessage NVARCHAR(MAX))
+
+    /*
+     * Collect list
+     */
+    INSERT INTO #ExcludedUsersLogMessages (LogMessage)
+    SELECT
+        LogMessage = (
+            SELECT
+                RunID = @RunID,
+                TYPE = 'WARNING',
+                Message = 'Unable to add user',
+                StageData = JSON_QUERY(
+                    (
+                        SELECT s2.*
+                        FROM dbo.atbl_Tge_AzureAdUsers_Staging AS s2
+                        WHERE s.ID = s2.ID
+                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                    ),
+                    '$'
+                )
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        )
+    FROM
+        dbo.atbl_Tge_AzureAdUsers_Staging s
+        LEFT JOIN #NewUsers n
+            ON n.ADAccount = s.AzureID
+    WHERE
+        n.DTJson IS NULL
+        AND NOT EXISTS (
+            SELECT
+                ADAccount
+            FROM
+                dbo.stbl_System_Persons p2
+            WHERE
+                CAST(s.AzureID AS NVARCHAR(50)) = p2.ADAccount
+        )
+
+    ----------------------------------------------- Log Excluded Users [End] --
 
     --------------------------------------------------- Expire users [START] --
     DROP TABLE IF EXISTS #UsersToExpire;
     CREATE TABLE #UsersToExpire (ID INT)
 
+    /*
+     * Collect list
+     */
     INSERT INTO
         #UsersToExpire (ID)
     SELECT DISTINCT
@@ -101,6 +139,9 @@
     DROP TABLE IF EXISTS #UsersToRevivify;
     CREATE TABLE #UsersToRevivify (ID INT)
 
+    /*
+     * Collect list
+     */
     INSERT INTO #UsersToRevivify (ID)
     SELECT DISTINCT
         P.ID
@@ -118,6 +159,9 @@
     DROP TABLE IF EXISTS #UsersToUpdate;
     CREATE TABLE #UsersToUpdate (ID INT)
 
+    /*
+     * Collect list
+     */
     INSERT INTO #UsersToUpdate (ID)
     SELECT DISTINCT
         P.ID
@@ -127,8 +171,7 @@
             ON CAST(S.AzureID AS NVARCHAR(50)) = P.ADAccount
     WHERE
         (
-            1 = 0
-            OR P.Email <> S.Email
+            P.Email <> S.Email
             OR P.FirstName <> S.FirstName
             OR P.LastName <> S.LastName
         )
@@ -159,15 +202,18 @@
     CREATE TABLE #LoginsToCreate (
         Person_ID int,
         UserType nvarchar(128),
-        Extenral_ID nvarchar(128),
+        External_ID nvarchar(128),
         WebSite nvarchar(100)
     )
 
+    /*
+     * Collect list
+     */
     INSERT INTO #LoginsToCreate
     (
         Person_ID,
         UserType,
-        Extenral_ID,
+        External_ID,
         WebSite
     )
         SELECT
@@ -204,39 +250,48 @@
     ---------------------------------------------- Insert PersonsUsers [END] --
 
     ----------------------------------------------- Grant Role Access [START]--
-    -- todo: integrate new users
-    -- SELECT
-    --     I.OrgUnit_ID,
-    --     I.Role_ID,
-    --     I.Person_ID,
-    --     I.Comment
-    -- FROM
-    --     (
-    --         SELECT
-    --             P.OrgUnit_ID,
-    --             R.Role_ID,
-    --             Person_ID = P.ID,
-    --             Comment = 'Granted by Azure AD Import'
-    --         FROM
-    --                 dbo.stbl_System_Persons P
-    --                 JOIN dbo.atbl_TGE_AzureAdUsers_Staging S
-    --                     ON S.AzureID = TRY_CONVERT(UNIQUEIDENTIFIER, ADAccount)
-    --                 JOIN dbo.atbl_TGE_AzureAdGroupsOrgUnits GOU
-    --                     ON P.OrgUnit_ID = GOU.OrgUnit_ID
-    --                     AND P.Email like '%@' + GOU.EmailDomain -- org unit is based user email domain
-    --                 JOIN dbo.atbl_TGE_AzureAdGroupsOrgUnitsRoles R
-    --                     ON R.AzureAdGroupsOrgUnits_ID = GOU.ID
-    --     ) I
-    --     LEFT JOIN dbo.stbl_System_OrgUnitsRoles OUR
-    --         ON OUR.OrgUnit_ID = I.OrgUnit_ID
-    --         AND OUR.Role_ID = I.Role_ID
-    --         AND OUR.Person_ID = I.Person_ID
-    -- WHERE
-    --     OUR.ID IS NULL
+    DROP TABLE IF EXISTS #RolesToGrant;
+
+    /*
+     * Collect list
+     */
+    SELECT
+        I.OrgUnit_ID,
+        I.Role_ID,
+        I.Person_ID,
+        I.Comment
+    INTO
+        #RolesToGrant
+    FROM
+        (
+            SELECT
+                P.OrgUnit_ID,
+                R.Role_ID,
+                Person_ID = P.ID,
+                Comment = 'Granted by Azure AD Import'
+            FROM
+                    dbo.stbl_System_Persons P
+                    JOIN dbo.atbl_TGE_AzureAdUsers_Staging S
+                        ON S.AzureID = TRY_CONVERT(UNIQUEIDENTIFIER, ADAccount)
+                    JOIN dbo.atbl_TGE_AzureAdGroupsOrgUnits GOU
+                        ON P.OrgUnit_ID = GOU.OrgUnit_ID
+                        AND P.Email like '%@' + GOU.EmailDomain -- org unit is based user email domain
+                    JOIN dbo.atbl_TGE_AzureAdGroupsOrgUnitsRoles R
+                        ON R.AzureAdGroupsOrgUnits_ID = GOU.ID
+        ) I
+        LEFT JOIN dbo.stbl_System_OrgUnitsRoles OUR
+            ON OUR.OrgUnit_ID = I.OrgUnit_ID
+            AND OUR.Role_ID = I.Role_ID
+            AND OUR.Person_ID = I.Person_ID
+    WHERE
+        OUR.ID IS NULL
+
     ------------------------------------------------ Grant Role Access [END] --
 
-select * from #NewUsers
-select * from #UsersToExpire
-select * from #UsersToRevivify
-select * from #UsersToUpdate
-select * from #LoginsToCreate
+    -- select * from #NewUsers
+    -- select * from #ExcludedUsersLogMessages
+    -- select * from #UsersToExpire
+    -- select * from #UsersToRevivify
+    -- select * from #UsersToUpdate
+    -- select * from #LoginsToCreate
+    -- select * from #RolesToGrant
