@@ -27,7 +27,7 @@ from
                 case
                     when STSL.Message like '%ExecuteProcedure - The wait operation timed out%' then 'ProcedureTimeOut'
                     when STSL.Message like '%OutOfMemoryException%' then 'OutOfMemoryException'
-                    when STSL.Message like '%Request failed with status code NotFound%' then 'NotFound'
+                    when STSL.Message like '%Request failed with status code NotFound%' then '404 - NotFound'
                     else STSL.Message
                 end,
             MessageContainsJson = isjson(substring(Message, CHARINDEX('{', Message), CHARINDEX('}', Message) - CHARINDEX('{', Message) + 1)),
