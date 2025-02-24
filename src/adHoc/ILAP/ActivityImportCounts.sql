@@ -8,7 +8,8 @@ SELECT
     ReportedActivityCount,
     ActivityImportCount,
     PimsActivityCount,
-    ActivityDiff = ActivityImportCount - PimsActivityCount
+    ActivityDiff = ActivityImportCount - PimsActivityCount,
+    PercentChange = format((ActivityImportCount - PimsActivityCount) / (1.0 * PimsActivityCount), 'P2')
 FROM
 (
     SELECT

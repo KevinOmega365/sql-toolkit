@@ -11,7 +11,7 @@ select
     ActivityRecordStatistics.ActivityCount,
     LastImport = ActivityRecordStatistics.MaxActivityCreation,
     ImportFreshness = rank() over (order by dateadd(hour, datediff(hour, 0, ActivityRecordStatistics.MaxActivityCreation), 0)), -- round to the nearest hour (see ref)
-    MimMaxImportTimespan = ActivityCreationTimeSpanSeconds,
+    MinMaxImportTimespan = ActivityCreationTimeSpanSeconds,
     ProjectReports.Status, -- Should be "OK" : "Ready" indicates that the was not imported into the atbl_PC_ProjBaseline_Exp_ILAPMhrs
     ProjectReports.StatusMessage
 from
