@@ -26,7 +26,7 @@ select
     DCS_Revision = revision, -- nvarchar(128),
     md5hash = md5hash, -- nvarchar(128),
     DCS_FileName = fileName, -- nvarchar(128)
-    DCS_Import_ExternalUniqueRef = 'DTS:' + cast(Id as char(36)),
+    DCS_Import_ExternalUniqueRef = 'DTS:' + cast(Id as char(36))
 from
     @fixedFiles
 
