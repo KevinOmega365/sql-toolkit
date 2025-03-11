@@ -14,12 +14,10 @@ DECLARE @NO_CHANGE AS NVARCHAR(50) = (SELECT TOP 1 ID FROM dbo.atbl_Integrations
 --     ,INTEGR_REC_STATUS = @NO_CHANGE
 -- from
 --     dbo.ltbl_Import_DCS_DCS_FileRepairRecords AS FRR WITH (NOLOCK)
---     join dbo.ltbl_Import_DTS_DCS_RevisionsFiles I_RF with (nolock)
---         on I_RF.object_guid = FRR.object_guid
 --     join dbo.atbl_DCS_RevisionsFiles P_RF with (nolock)
 --         on P_RF.PrimKey = FRR.DcsRevFileRef
 -- where
---     P_RF.FileRef = I_RF.DCS_FileRef
+--     P_RF.FileRef = FRR.DCS_FileRef
 --     and FRR.INTEGR_REC_STATUS = 'IMPORTED_OK'
 
 /*
