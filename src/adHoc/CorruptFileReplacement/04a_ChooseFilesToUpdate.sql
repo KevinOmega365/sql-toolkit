@@ -89,3 +89,14 @@ DECLARE @NO_CHANGE AS NVARCHAR(50) = (SELECT TOP 1 ID FROM dbo.atbl_Integrations
 --     P_D.CurrentRevision = P_R.Revision
 --     and FRR.INTEGR_REC_STATUS = 'IMPORTED_OK'
 --     and right(P_R.Step, 1) = 'R'
+
+/*
+ * All of the rest
+ */
+-- -- update top (500) FRR set
+-- select
+--     INTEGR_REC_STATUS = @ACTION_UPDATE_FILE
+-- from
+--     dbo.ltbl_Import_DCS_DCS_FileRepairRecords AS FRR WITH (NOLOCK)
+-- where
+--     FRR.INTEGR_REC_STATUS = 'IMPORTED_OK'
