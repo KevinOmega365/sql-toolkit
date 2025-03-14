@@ -4,8 +4,8 @@ DECLARE @TestingPipelinePrimKey UNIQUEIDENTIFIER = '98b779b1-02ef-4886-82ef-19ab
 /*
  * Proc parameters
  */
-DECLARE @PipelineStepPrimKey UNIQUEIDENTIFIER = '9fce2e18-b4e9-4f1e-b849-257a560f1763'
-DECLARE @newSequenceOrder NVARCHAR(15) = '5.1.1'
+DECLARE @PipelineStepPrimKey UNIQUEIDENTIFIER = '9fce2e18-b4e9-4f1e-b849-257a560f1763' 
+DECLARE @newSequenceOrder NVARCHAR(15) = '1.1.1'
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ order by SortOrder
         SELECT TOP 1 1 
         FROM @MockGroupTasks
         WHERE GroupRef = @GroupRef AND PrimKey <> @PipelineStepPrimKey AND SequenceOrder = @newSequenceOrder
-        ) 
+    )
     BEGIN
         DECLARE @NumDots INT = 0
         SET @NumDots = LEN(@newSequenceOrder) - LEN(REPLACE(@newSequenceOrder, '.', ''))
@@ -71,44 +71,43 @@ order by SortOrder
 
         IF @NumDots = 0
         BEGIN
+            print 'no dots for you'
             UPDATE @MockGroupTasks 
             SET SequenceOrder = '999', SortOrder = dbo.afnc_Integrations_GetSortOrder('999')
             FROM @MockGroupTasks
             WHERE GroupRef = @GroupRef AND PrimKey = @PipelineStepPrimKey;
 
             UPDATE @MockGroupTasks 
-            SET SequenceOrder = SequenceOrder + 1
+            SET SequenceOrder = SequenceOrder + 1, SortOrder = dbo.afnc_Integrations_GetSortOrder(SequenceOrder + 1)
             FROM @MockGroupTasks
             WHERE GroupRef = @GroupRef AND PrimKey <> @PipelineStepPrimKey AND SortOrder >= @newSortOrder
-
-            UPDATE @MockGroupTasks 
-            SET SequenceOrder = @newSequenceOrder
-            FROM @MockGroupTasks
-            WHERE GroupRef = @GroupRef AND PrimKey = @PipelineStepPrimKey;
         END
 
         IF @NumDots > 0
         BEGIN
+            print 'throw more dots'
             UPDATE @MockGroupTasks 
-            SET SequenceOrder = '9999'
+            SET SequenceOrder = '999'
             FROM @MockGroupTasks
             WHERE GroupRef = @GroupRef AND PrimKey = @PipelineStepPrimKey;
 
             UPDATE @MockGroupTasks 
-            SET SequenceOrder = @newSequenceOrderPrefix + CAST(CAST(SUBSTRING(SequenceOrder, LEN(@newSequenceOrderPrefix)+1, LEN(SequenceOrder) - LEN(@newSequenceOrderPrefix)+1) AS INT) + 1 AS NVARCHAR(MAX))
+            SET
+                SequenceOrder = @newSequenceOrderPrefix + CAST(CAST(SUBSTRING(SequenceOrder, LEN(@newSequenceOrderPrefix)+1, LEN(SequenceOrder) - LEN(@newSequenceOrderPrefix)+1) AS INT) + 1 AS NVARCHAR(MAX)),
+                SortOrder = dbo.afnc_Integrations_GetSortOrder(@newSequenceOrderPrefix + CAST(CAST(SUBSTRING(SequenceOrder, LEN(@newSequenceOrderPrefix)+1, LEN(SequenceOrder) - LEN(@newSequenceOrderPrefix)+1) AS INT) + 1 AS NVARCHAR(MAX)))
             FROM @MockGroupTasks
             WHERE GroupRef = @GroupRef AND PrimKey <> @PipelineStepPrimKey AND SortOrder >= @newSortOrder AND SequenceOrder LIKE @newSequenceOrderPrefix + '%';
-
-            UPDATE @MockGroupTasks 
-            SET SequenceOrder = @newSequenceOrder
-            FROM @MockGroupTasks
-            WHERE GroupRef = @GroupRef AND PrimKey = @PipelineStepPrimKey 
         END
     END
 
+    UPDATE @MockGroupTasks
+    SET SequenceOrder = @newSequenceOrder, SortOrder = dbo.afnc_Integrations_GetSortOrder(@newSequenceOrder)
+    FROM @MockGroupTasks
+    WHERE GroupRef = @GroupRef AND PrimKey = @PipelineStepPrimKey;
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-select * from #OriginalMockGroupTasks
-select * from @MockGroupTasks
+select * from @MockGroupTasks order by SortOrder
+select * from #OriginalMockGroupTasks order by SortOrder
