@@ -73,8 +73,6 @@ from
             @Tasks
     ) T
 ) U
-where
-    SequenceOrder >= @newSequenceOrder
 
 -------------------------------------------------------------------------------
 
