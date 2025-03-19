@@ -1,133 +1,161 @@
--------------------------------------------------------------------------------
-declare @databaseObjectPattern nvarchar(max) = '[al][stv][bit][lpvwx][_]%' --  astp|atbl|atbx|atbv|aviw|lstp|ltbl|ltbx|ltbv|lviw
--------------------------------------------------------------------------------
-DROP TABLE IF EXISTS #ProcessingStack
-DROP TABLE IF EXISTS #Result
--------------------------------------------------------------------------------
-CREATE TABLE #ProcessingStack (
-    EndPointRef uniqueidentifier,
-    StackRecordID INT IDENTITY(1, 1),
-    JsonObject nvarchar(max),
-    Type int,
-    JsonPath nvarchar(max)
-)
-CREATE TABLE #Result (
-    EndPointRef uniqueidentifier,
-    JsonPath nvarchar(max),
-    StringValue nvarchar(max),
-    Type int
-)
--------------------------------------------------------------------------------
-/*
- * Add the initial population
- */
-insert into #ProcessingStack (
-    EndPointRef,
-    JsonObject,
-    JsonPath,
-    Type
-)
-select
-    EndPointRef = PrimKey,
-    JsonObject = EndpointConfig,
-    JsonPath = '$',
-    Type = 5 -- assume that the top level JSON is an object (not array)
-from
-    dbo.atbl_Integrations_Setup_Endpoints with (nolock)
-where
-    isjson(EndpointConfig) = 1
--------------------------------------------------------------------------------
-declare
-    @EndPointRef uniqueidentifier,
-    @StackRecordID int,
-    @JsonObject nvarchar(max),
-    @Type int,
-    @JsonPath nvarchar(max)
--------------------------------------------------------------------------------
-while(exists (select * from #ProcessingStack))
-begin
+    ---------------------------------------------------------------------------
+    DECLARE @databaseObjectPattern NVARCHAR(max) = '[al][stv][bit][lpvwx][_]%' --  astp|atbl|atbx|atbv|aviw|lstp|ltbl|ltbx|ltbv|lviw
+    ---------------------------------------------------------------------------
+    -- ref:https://learn.microsoft.com/en-us/sql/t-sql/functions/openjson-transact-sql?view=sql-server-ver16
+    DECLARE
+        @Null TINYINT = 0,
+        @String TINYINT = 1,
+        @Number TINYINT = 2,
+        @TrueFalse TINYINT = 3,
+        @Array TINYINT = 4,
+        @Object TINYINT = 5
+    ---------------------------------------------------------------------------
+    DROP TABLE IF EXISTS #ProcessingStack
+    DROP TABLE IF EXISTS #Result
+    ---------------------------------------------------------------------------
+    CREATE TABLE #ProcessingStack (
+        EndPointRef uniqueidentifier,
+        StackRecordID INT IDENTITY(1, 1),
+        JsonObject NVARCHAR(max),
+        TYPE INT,
+        JsonPath NVARCHAR(max)
+    )
+    CREATE TABLE #Result (
+        EndPointRef uniqueidentifier,
+        JsonPath NVARCHAR(max),
+        StringValue NVARCHAR(max),
+        TYPE INT
+    )
+    ---------------------------------------------------------------------------
+    /*
+     * Add the initial population
+     */
+    INSERT INTO
+        #ProcessingStack (
+            EndPointRef,
+            JsonObject,
+            JsonPath,
+            TYPE
+        )
+    SELECT
+        EndPointRef = PrimKey,
+        JsonObject = EndpointConfig,
+        JsonPath = '$',
+    TYPE = @Object -- assume that the top level JSON is an object (not array)
+    FROM
+        dbo.atbl_Integrations_Setup_Endpoints WITH (NOLOCK)
+    WHERE
+        ISJSON(EndpointConfig) = 1
+    ---------------------------------------------------------------------------
+    DECLARE
+        @EndPointRef uniqueidentifier,
+        @StackRecordID INT,
+        @JsonObject NVARCHAR(max),
+        @Type INT,
+        @JsonPath NVARCHAR(max)
+    ---------------------------------------------------------------------------
+    WHILE (
+        EXISTS (
+            SELECT
+                *
+            FROM
+                #ProcessingStack
+        )
+    )
+    BEGIN
     /*
      *  get the top the stack
      */
-    select top 1
-        @EndPointRef = EndPointRef,
+    SELECT
+        TOP 1 @EndPointRef = EndPointRef,
         @StackRecordID = StackRecordID,
         @JsonObject = JsonObject,
-        @Type = Type,
+        @Type = TYPE,
         @JsonPath = JsonPath
-    from
+    FROM
         #ProcessingStack
-    order by
-        StackRecordID desc
-
+    ORDER BY
+        StackRecordID DESC
     /*
      * pop the stack
      */
-    delete #ProcessingStack
-    where StackRecordID = @StackRecordID
-
+    DELETE #ProcessingStack
+    WHERE
+        StackRecordID = @StackRecordID
     /*
-    * Put basic values in the result
-    */
-    insert into #Result (
-        EndPointRef,
-        JsonPath,
-        StringValue,
-        Type
-    )
-    select
+     * Put basic values in the result
+     */
+    INSERT INTO
+        #Result (
+            EndPointRef,
+            JsonPath,
+            StringValue,
+            TYPE
+        )
+    SELECT
         @EndPointRef,
-        JsonPath =
-            @JsonPath +
-            case when @Type = 4 then '[' else '.' end +
-            Entries.[key] +
-            case when @Type = 4 then ']' else '' end
-        ,
+        JsonPath = @JsonPath + CASE
+            WHEN @Type = @Array THEN '['
+            ELSE '.'
+        END + Entries.[key] + CASE
+            WHEN @Type = @Array THEN ']'
+            ELSE ''
+        END,
         Entries.value,
         Entries.type
-    from
-        openjson(@JsonObject) Entries
-    where
-        Entries.type in (0, 1, 2, 3)
-
-/*
-* Put structure(s) back on the stack
-*/
-insert into #ProcessingStack (
-    EndPointRef,
-    JsonObject,
-    JsonPath,
-    Type
-)
-    select
+    FROM
+        openjson (@JsonObject) Entries
+    WHERE
+        Entries.type IN (@Null, @String, @Number, @TrueFalse)
+    /*
+     * Put structure(s) back on the stack
+     */
+    INSERT INTO
+        #ProcessingStack (
+            EndPointRef,
+            JsonObject,
+            JsonPath,
+            TYPE
+        )
+    SELECT
         @EndPointRef,
         Entries.value,
-        EntryPath =
-            @JsonPath +
-            case when @Type = 4 then '[' else '.' end +
-            Entries.[key] +
-            case when @Type = 4 then ']' else '' end
-        ,
+        EntryPath = @JsonPath + CASE
+            WHEN @Type = @Array THEN '['
+            ELSE '.'
+        END + Entries.[key] + CASE
+            WHEN @Type = @Array THEN ']'
+            ELSE ''
+        END,
         Entries.type
-    from
-        openjson(@JsonObject) Entries
-    where
-        Entries.type in (4, 5)
-end
--------------------------------------------------------------------------------
-select
-    Endpoints.System,
-    Endpoints.Name,
-    Results.EndPointRef,
-    Results.JsonPath,
-    Results.StringValue,
-    Results.Type,
-    ValueFromPath = json_value(Endpoints.EndpointConfig, JsonPath COLLATE Latin1_General_CI_AS)
-from
-    #Result Results
-    join dbo.atbl_Integrations_Setup_Endpoints Endpoints with (nolock)
-        on EndPoints.PrimKey = Results.EndPointRef
-where
-    StringValue like @databaseObjectPattern
-
-select * from #ProcessingStack order by StackRecordID desc
+    FROM
+        openjson (@JsonObject) Entries
+    WHERE
+        Entries.type IN (@Array, @Object) END
+    ---------------------------------------------------------------------------
+    -- INSERT INTO dbo.atbl_Integrations_DevTools_DatabaseObjectSources
+    -- (
+    --     SourceType,
+    --     SourceParentRef,
+    --     SourceRef,
+    --     ObjectName
+    -- )
+    SELECT
+        Endpoints.System,
+        Endpoints.Name,
+        Results.EndPointRef,
+        Results.JsonPath,
+        Results.StringValue,
+        Results.Type,
+        ValueFromPath = JSON_VALUE(
+            Endpoints.EndpointConfig,
+            JsonPath
+            COLLATE Latin1_General_CI_AS
+        )
+    FROM
+        #Result Results
+        JOIN dbo.atbl_Integrations_Setup_Endpoints Endpoints WITH (NOLOCK)
+            ON EndPoints.PrimKey = Results.EndPointRef
+    WHERE
+        StringValue LIKE @databaseObjectPattern
+    ---------------------------------------------------------------------------
