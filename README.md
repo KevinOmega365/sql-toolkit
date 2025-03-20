@@ -18,6 +18,10 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 * [CheckDtsDocumentImport.sql](src/dcs_integration/CheckDtsDocumentImport.sql): find whether a set of documents and revisions are present in the import data and/or in Pims DCS.
 * [PastedDocumentRevisions.js](src/dcs_integration/PastedDocumentRevisions.js): transform date-documentNo-revision tab-spaced lists (pasted from Excel) into SQL ```VALUES``` tuples like ```('YOUR_DOCUMENT_NUMBER', 'YOUR_REVISION')```
 
+## 
+
+* [DataCoverageRatioPercentAndSample.sql](src/pipeline_development/): check percents of non-null column data and sample values
+
 ## Finding scripts in this dumster fire
 
 Use the search functionality in github.com ```repo:KevinOmega365/sql-toolkit YOUR_SEARCH_TERMS_HERE```
