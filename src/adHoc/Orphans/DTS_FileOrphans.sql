@@ -28,7 +28,6 @@ FROM
                 ON DRF_SF.PrimKey = DRF.FileRef
         WHERE
             DRF.Domain IN ('128', '145', '153', '187')
-            AND DRF.CreatedBy = 'af_Integrations_ServiceUser'
     ) P
     JOIN (
         SELECT
@@ -59,51 +58,149 @@ CREATE NONCLUSTERED INDEX ix_PimsImport ON #RevisionsFilesLinks (PimsRef, Import
 
 CREATE NONCLUSTERED INDEX ix_ImportPims ON #RevisionsFilesLinks (ImportRef, PimsRef);
 
+/*
+ * Orphaned files counts by domain
+ */
 SELECT
-    T.Domain,
-    CommonRevisionFiles,
-    OrphanedFiles,
-    IgnoredFiles
+    Domain,
+    COUNT(*) AS OrphanedFiles
 FROM
-    (
-        SELECT
-            Domain,
-            COUNT(*) AS CommonRevisionFiles
-        FROM
-            dbo.atbl_DCS_RevisionsFiles AS DRF WITH (NOLOCK)
-            JOIN #RevisionsFilesLinks L
-                ON DRF.PrimKey = L.PimsRef
-        WHERE
-            DRF.Domain IN ('128', '145', '153', '187')
-        GROUP BY
-            Domain
-    ) T
-    JOIN (
-        SELECT
-            Domain,
-            COUNT(*) AS OrphanedFiles
-        FROM
-            dbo.atbl_DCS_RevisionsFiles AS DRF WITH (NOLOCK)
-            LEFT JOIN #RevisionsFilesLinks L
-                ON DRF.PrimKey = L.PimsRef
-        WHERE
-            DRF.CreatedBy = 'af_Integrations_ServiceUser'
-            AND L.ImportRef IS NULL
-            AND DRF.Domain IN ('128', '145', '153', '187')
-        GROUP BY
-            Domain
-    ) U ON U.Domain = T.Domain
-    JOIN (
-        SELECT
-            Domain = I.DCS_Domain,
-            COUNT(*) AS IgnoredFiles
-        FROM
-            dbo.ltbl_Import_DTS_DCS_RevisionsFiles AS I WITH (NOLOCK)
-            LEFT JOIN #RevisionsFilesLinks L
-                ON I.PrimKey = L.ImportRef
-        WHERE
-            L.PimsRef IS NULL
-            AND I.DCS_Domain IN ('128', '145', '153', '187')
-        GROUP BY
-            I.DCS_Domain
-    ) V ON V.Domain = U.Domain
+    dbo.atbl_DCS_RevisionsFiles AS DRF WITH (NOLOCK)
+    LEFT JOIN #RevisionsFilesLinks L
+        ON DRF.PrimKey = L.PimsRef
+WHERE
+    DRF.CreatedBy = 'af_Integrations_ServiceUser'
+    AND L.ImportRef IS NULL
+    AND DRF.Domain IN ('128', '145', '153', '187')
+GROUP BY
+    Domain
+
+/*
+ * Counts for file in Pims and/or the Imports
+ */
+-- SELECT
+--     T.Domain,
+--     FilesInImportAndPims,
+--     FilesOnlyInPims,
+--     FilesOnlyInTheImport
+-- FROM
+--     (
+--         SELECT
+--             Domain,
+--             COUNT(*) AS FilesInImportAndPims
+--         FROM
+--             dbo.atbl_DCS_RevisionsFiles AS DRF WITH (NOLOCK)
+--             JOIN #RevisionsFilesLinks L
+--                 ON DRF.PrimKey = L.PimsRef
+--         WHERE
+--             DRF.Domain IN ('128', '145', '153', '187')
+--         GROUP BY
+--             Domain
+--     ) T
+--     JOIN (
+--         SELECT
+--             Domain,
+--             COUNT(*) AS FilesOnlyInPims -- created by any user
+--         FROM
+--             dbo.atbl_DCS_RevisionsFiles AS DRF WITH (NOLOCK)
+--             LEFT JOIN #RevisionsFilesLinks L
+--                 ON DRF.PrimKey = L.PimsRef
+--         WHERE
+--             L.ImportRef IS NULL
+--             AND DRF.Domain IN ('128', '145', '153', '187')
+--         GROUP BY
+--             Domain
+--     ) U ON U.Domain = T.Domain
+--     JOIN (
+--         SELECT
+--             Domain = I.DCS_Domain,
+--             COUNT(*) AS FilesOnlyInTheImport
+--         FROM
+--             dbo.ltbl_Import_DTS_DCS_RevisionsFiles AS I WITH (NOLOCK)
+--             LEFT JOIN #RevisionsFilesLinks L
+--                 ON I.PrimKey = L.ImportRef
+--         WHERE
+--             L.PimsRef IS NULL
+--             AND I.DCS_Domain IN ('128', '145', '153', '187')
+--         GROUP BY
+--             I.DCS_Domain
+--     ) V ON V.Domain = U.Domain
+
+/*
+ * Unmatched (Import-Pims) files by domain, status and trace
+ */
+-- SELECT
+--     T.Domain,
+--     T.ImportStatus,
+--     T.ImportTrace,
+--     COUNT(*) AS FilesOnlyInTheImport
+-- FROM
+-- (
+--     SELECT
+--         Domain = I.DCS_Domain,
+--         ImportStatus = I.INTEGR_REC_STATUS,
+--         ImportTrace = I.INTEGR_REC_TRACE
+--     FROM
+--         dbo.ltbl_Import_DTS_DCS_RevisionsFiles AS I WITH (NOLOCK)
+--         LEFT JOIN #RevisionsFilesLinks L
+--             ON I.PrimKey = L.ImportRef
+--     WHERE
+--         L.PimsRef IS NULL
+--         AND I.DCS_Domain IN ('128', '145', '153', '187')
+-- ) T
+-- GROUP BY
+--     T.Domain,
+--     T.ImportStatus,
+--     T.ImportTrace
+-- ORDER BY
+--     T.Domain,
+--     T.ImportStatus,
+--     T.ImportTrace
+
+/*
+ * List unmatched (Import-Pims) files by domain, status and trace
+ */
+-- DECLARE @Domain NVARCHAR(128) = '%'
+-- DECLARE @ImportStatus NVARCHAR(128) = 'INSERTED'
+-- SELECT
+--     -- -- live links in af-db-manager
+--     -- activate_link_document =
+--     --     '<a href="' +
+--     --     'https://pims.akerbp.com/dcs-documents-details?Domain=' +
+--     --     T.Domain +
+--     --     '&DocID=' +
+--     --     T.DocumentID +
+--     --     '">' +
+--     --     T.DocumentID +
+--     --     '</a>',
+--     T.Domain,
+--     T.DocumentID,
+--     Revision,
+--     OriginalFilename,
+--     T.ImportStatus,
+--     T.ImportTrace
+-- FROM
+-- (
+--     SELECT
+--         Domain = I.DCS_Domain,
+--         DocumentID = I.DCS_DocumentID,
+--         Revision = I.DCS_Revision,
+--         OriginalFilename = I.DCS_OriginalFilename,
+--         ImportStatus = I.INTEGR_REC_STATUS,
+--         ImportTrace = I.INTEGR_REC_TRACE
+--     FROM
+--         dbo.ltbl_Import_DTS_DCS_RevisionsFiles AS I WITH (NOLOCK)
+--         LEFT JOIN #RevisionsFilesLinks L
+--             ON I.PrimKey = L.ImportRef
+--     WHERE
+--         L.PimsRef IS NULL
+--         AND I.DCS_Domain IN ('128', '145', '153', '187')
+-- ) T
+-- WHERE
+--     Domain LIKE @Domain
+--     AND ImportStatus LIKE @ImportStatus
+-- ORDER BY
+--     Domain,
+--     DocumentID,
+--     Revision,
+--     OriginalFilename
