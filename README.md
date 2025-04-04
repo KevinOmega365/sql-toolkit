@@ -22,9 +22,9 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 Objects created by the integration, but nolonger present in the source data
 
-* [DTS_DocumentOrphans.sql](src\adHoc\Orphans\DTS_DocumentOrphans.sql): Documents counts, lists and links
-* [DTS_RevisionOrphans.sql](src\adHoc\Orphans\DTS_RevisionOrphans.sql): Revisions counts
-* [DTS_FileOrphans.sql](src\adHoc\Orphans\DTS_FileOrphans.sql): Files counts, lists and links
+* [DTS_DocumentOrphans.sql](src/adHoc/Orphans/DTS_DocumentOrphans.sql): Documents counts, lists and links
+* [DTS_RevisionOrphans.sql](src/adHoc/Orphans/DTS_RevisionOrphans.sql): Revisions counts
+* [DTS_FileOrphans.sql](src/adHoc/Orphans/DTS_FileOrphans.sql): Files counts, lists and links
 
 ## Data Coverage
 
