@@ -9,9 +9,10 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 * [CheckRevisionsWithoutFiles.sql](src/reporting/CheckRevisionsWithoutFiles.sql): get a quick yes/no on metadata and "physical" file existence
 * [CorrelatedFileErrorsLogErrors.sql](src/adHoc/FileNotFoundErrors/CorrelatedFileErrorsLogErrors.sql): REST assembly errors with corresponding DocumentID and Revision from the import records
 
-### DTS - DCS Overview
+### Pipeline Overview
 
 * [PipelinesStartTimes.sql](src/dcs_integration/PipelinesStartTimes.sql): Pipeline start times.
+* [UpdateSqlStepTimeout.sql](/src/adHoc/UnifyPipelines/UpdateSqlStepTimeout.sql): Pipeline SQL step timeouts review and update
 
 ### Check up on import status of particular documents
 
