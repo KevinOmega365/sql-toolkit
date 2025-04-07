@@ -5,12 +5,13 @@ declare
     @Yggdrasil uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0',
     @EdvardGrieg uniqueidentifier = 'edadd424-81ce-4170-b419-12642f80cfde'
 
-declare @GroupRef nvarchar(36) = @Yggdrasil -- '%'
+declare @GroupRef nvarchar(36) = @Munin -- '%'
 
 /*
  * SQL tasks timeouts
  */
 select
+    TaskRef = Step.Primkey,
     Step.SequenceOrder,
     Step.Name,
     StoredProcedure = json_value(Step.StepConfig, '$.Procedure'),
@@ -29,11 +30,13 @@ order by
 /*
  * Set timeout
  */
+-- declare @TaskRef nvarchar(36) = '68efb42f-c963-4859-98cd-5448242273a1' -- '%'
 -- -- update Step set
--- select
---     StepConfig = json_modify(Step.StepConfig, '$.Timeout', 4800)
+-- select CurrentTimeout = json_value(Step.StepConfig, '$.Timeout'),
+--     StepConfig = json_modify(Step.StepConfig, '$.Timeout', 2400)
 -- from 
 --     dbo.atbl_Integrations_ScheduledTasksConfigGroupTasks AS Step WITH (NOLOCK)
 -- where
 --     Step.GroupRef LIKE @GroupRef
+--     and Step.PrimKey LIKE @TaskRef
 --     and Step.StepType = 'Stored Procedure'
