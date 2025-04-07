@@ -23,7 +23,7 @@ where
     Pipeline.Primkey LIKE @GroupRef
     and Step.StepType = 'Stored Procedure'
 order by
-    Step.SequenceOrder, -- this won't work for cases like 1.2.3
+    Step.SortOrder,
     Step.Name
 
 /*
