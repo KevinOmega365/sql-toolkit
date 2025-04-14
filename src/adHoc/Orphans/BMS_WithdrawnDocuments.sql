@@ -11,5 +11,10 @@ FROM
         AND I.DCS_DocumentID = DCS.DocumentID
 WHERE
     DCS.Domain = 'PRO'
-    and I.DCS_DocumentID IS NULL
+    and I.PrimKey IS NULL
     and DCS.CreatedBy = 'af_Integrations_ServiceUser'
+
+/*
+ * Import Statuses
+ */
+select distinct document_a_status from dbo.ltbl_Import_BMS_RAW AS I WITH (NOLOCK)
