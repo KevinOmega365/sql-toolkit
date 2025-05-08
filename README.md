@@ -18,6 +18,7 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 * [CheckDtsDocumentImport.sql](src/dcs_integration/CheckDtsDocumentImport.sql): find whether a set of documents and revisions are present in the import data and/or in Pims DCS.
 * [PastedDocumentRevisions.js](src/dcs_integration/PastedDocumentRevisions.js): transform date-documentNo-revision tab-spaced lists (pasted from Excel) into SQL ```VALUES``` tuples like ```('YOUR_DOCUMENT_NUMBER', 'YOUR_REVISION')```
+* [CheckDocRevFileWithLog.sql](src/dcs_integration/CheckDocRevFileWithLog.sql): Detailed check pulling in file and log data
 
 ## Orphaned DB Objects
 
