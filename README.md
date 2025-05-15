@@ -22,7 +22,7 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 ## Quality Revisions without Files
 
-* [CheckRevisionsWithoutFilesMetadataAndLog.sql](src/dcs_integrations/CheckRevisionsWithoutFilesMetadataAndLog.sql): Related log and metadata details for missing files errors on revsions
+* [CheckRevisionsWithoutFilesMetadataAndLog.sql](src/dcs_integration/CheckRevisionsWithoutFilesMetadataAndLog.sql): Related log and metadata details for missing files errors on revsions
 
 ## Orphaned DB Objects
 
