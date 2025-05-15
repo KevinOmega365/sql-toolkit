@@ -20,6 +20,10 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 * [PastedDocumentRevisions.js](src/dcs_integration/PastedDocumentRevisions.js): transform date-documentNo-revision tab-spaced lists (pasted from Excel) into SQL ```VALUES``` tuples like ```('YOUR_DOCUMENT_NUMBER', 'YOUR_REVISION')```
 * [CheckDocRevFileWithLog.sql](src/dcs_integration/CheckDocRevFileWithLog.sql): Detailed check pulling in file and log data
 
+## Quality Revisions without Files
+
+* [CheckRevisionsWithoutFilesMetadataAndLog.sql](src/dcs_integrations/CheckRevisionsWithoutFilesMetadataAndLog.sql): Related log and metadata details for missing files errors on revsions
+
 ## Orphaned DB Objects
 
 Objects created by the integration, but nolonger present in the source data
