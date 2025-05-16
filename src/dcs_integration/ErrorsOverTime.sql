@@ -57,23 +57,77 @@ order by
 -------------------------------------------------------------------------------
 
 /*
- * Current errors per pipeline
+ * Current objects with duration
+ *
+ *   there is a difference between an object's and an error's durration
+ *
+ *     ErrorRef idetifies a single (Status, Error, Trace) for an object
+ *
+ *     ObjectRef identifies an entity (Pipeline, PrimaryKeyValues, Table),
+ *       which could have different errors from run to run
  */
 select
-    Pipeline = (select name from dbo.atbl_Integrations_ScheduledTasksConfigGroups as S with (nolock) where s.PrimKey = EI.INTEGR_REC_GROUPREF),
-    EI.INTEGR_REC_BATCHREF,
-    BatchDateTime = max(EI.Created),
-    Count = count(*)
+    Pipeline,
+    ObjectType,
+    ObjectKeys,
+    ErrorDurationBatches,
+    ObjectDurationDays,
+    ObjectFirstSeen,
+    ObjectLastSeen
 from
-    dbo.ltbl_Import_DTS_DCS_ErrorsInstances EI with (nolock)
-    join @LatestBatches LatestBatches
-        on LatestBatches.INTEGR_REC_GROUPREF = EI.INTEGR_REC_GROUPREF
-        and LatestBatches.INTEGR_REC_BATCHREF = EI.INTEGR_REC_BATCHREF
-group by
-    EI.INTEGR_REC_GROUPREF,
-    EI.INTEGR_REC_BATCHREF
+    ( 
+        select
+            Pipeline = (
+                select name
+                from dbo.atbl_Integrations_ScheduledTasksConfigGroups as S with (nolock)
+                where s.PrimKey = EI.INTEGR_REC_GROUPREF
+            ),
+            ObjectType,
+            ObjectKeys,
+            ErrorDurationBatches = (
+                select count(distinct INTEGR_REC_BATCHREF)
+                from dbo.ltbl_Import_DTS_DCS_ErrorsInstances Intances with (nolock)
+                where Intances.ErrorRef = EI.ErrorRef
+            ),
+            ObjectDurationDays = datediff(day, EO.Created, EO.Updated),
+            ObjectFirstSeen = EO.Created,
+            ObjectLastSeen = EO.Updated
+        from
+            @LatestBatches LatestBatches
+            join dbo.ltbl_Import_DTS_DCS_ErrorsInstances EI with (nolock)
+                on LatestBatches.INTEGR_REC_GROUPREF = EI.INTEGR_REC_GROUPREF
+                and LatestBatches.INTEGR_REC_BATCHREF = EI.INTEGR_REC_BATCHREF
+            join dbo.ltbl_Import_DTS_DCS_ErrorsObjects EO with (nolock)
+                on EO.PrimKey = EI.ObjectRef
+            join dbo.ltbl_Import_DTS_DCS_ErrorsDetails ED with (nolock)
+                on ED.PrimKey = EI.ErrorRef
+    ) T
+-- where
+--     ErrorDurationBatches > 2
 order by
-    Pipeline
+    Pipeline,
+    ErrorDurationBatches desc,
+    ObjectType,
+    ObjectKeys
+
+/*
+ * Current errors per pipeline
+ */
+-- select
+--     Pipeline = (select name from dbo.atbl_Integrations_ScheduledTasksConfigGroups as S with (nolock) where s.PrimKey = EI.INTEGR_REC_GROUPREF),
+--     EI.INTEGR_REC_BATCHREF,
+--     BatchDateTime = max(EI.Created),
+--     Count = count(*)
+-- from
+--     dbo.ltbl_Import_DTS_DCS_ErrorsInstances EI with (nolock)
+--     join @LatestBatches LatestBatches
+--         on LatestBatches.INTEGR_REC_GROUPREF = EI.INTEGR_REC_GROUPREF
+--         and LatestBatches.INTEGR_REC_BATCHREF = EI.INTEGR_REC_BATCHREF
+-- group by
+--     EI.INTEGR_REC_GROUPREF,
+--     EI.INTEGR_REC_BATCHREF
+-- order by
+--     Pipeline
 
 -------------------------------------------------------------------------------
 ------------------------------------------------------------------- Sketches --
