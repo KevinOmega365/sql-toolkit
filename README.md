@@ -22,6 +22,7 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 ## Quality Revisions without Files
 
+* [ErrorsOverTime.sql](src/dcs_integration/ErrorsOverTime.sql): Errors that persist over pipeline runs
 * [CheckRevisionsWithoutFilesMetadataAndLog.sql](src/dcs_integration/CheckRevisionsWithoutFilesMetadataAndLog.sql): Related log and metadata details for missing files errors on revsions
 
 ## Orphaned DB Objects
