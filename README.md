@@ -24,6 +24,7 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 * [ErrorsOverTime.sql](src/dcs_integration/ErrorsOverTime.sql): Errors that persist over pipeline runs
 * [CheckRevisionsWithoutFilesMetadataAndLog.sql](src/dcs_integration/CheckRevisionsWithoutFilesMetadataAndLog.sql): Related log and metadata details for missing files errors on revsions
+* [CheckRevisionsWithoutFilesMetadataAndLogWithErrorsOverTime.sql](src/dcs_integration/CheckRevisionsWithoutFilesMetadataAndLogWithErrorsOverTime.sql): All together: logs, metadata, error persistence
 
 ## Orphaned DB Objects
 
