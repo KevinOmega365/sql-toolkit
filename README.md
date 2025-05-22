@@ -21,7 +21,7 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 * [CheckDocRevFileWithLog.sql](src/dcs_integration/CheckDocRevFileWithLog.sql): Detailed check pulling in file and log data
 
 ## Quality Revisions without Files
-
+* [PipelineErrorsInOutPerBatch.sql](src/reporting/PipelineErrorsInOutPerBatch.sql): Errors In and Out
 * [ErrorsOverTime.sql](src/dcs_integration/ErrorsOverTime.sql): Errors that persist over pipeline runs
 * [CheckRevisionsWithoutFilesMetadataAndLog.sql](src/dcs_integration/CheckRevisionsWithoutFilesMetadataAndLog.sql): Related log and metadata details for missing files errors on revsions
 * [CheckRevisionsWithoutFilesMetadataAndLogWithErrorsOverTime.sql](src/dcs_integration/CheckRevisionsWithoutFilesMetadataAndLogWithErrorsOverTime.sql): All together: logs, metadata, error persistence
