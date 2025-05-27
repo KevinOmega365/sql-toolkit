@@ -1,0 +1,45 @@
+@MappingSetRef = '1f1a2489-ac38-4018-bc83-fe8a442eafa0', -- Domain
+@MappingSetRef = '5e9494c9-cf12-4475-b800-152384e6deea', -- DocumentGroup
+@MappingSetRef = '37c16a94-6b28-4b28-9c3a-5737beba6065', -- Boolean: DFO
+@MappingSetRef = '62049a10-67af-4773-a95d-b8770382d540', -- Document Renaming
+@MappingSetRef = '4c6875f6-4cfe-4d74-8ccd-b21d10319ac1', -- Revsion Renaming
+@MappingSetRef = 'd7910950-5649-438a-a41f-2a8eed18eca0', -- Revsion-File Renaming
+
+EXEC lstp_Import_DTS_DCS_ApplyFieldMappings_Map
+EXEC lstp_Import_DTS_DCS_ApplyFieldMappings_Rename
+
+    EXEC lstp_Import_DTS_DCS_ApplyFieldMappings_Map
+        @GroupRef = @GroupRef,
+        @BatchRef = @BatchRef,
+        @MappingSetRef = '1f1a2489-ac38-4018-bc83-fe8a442eafa0', -- Domain
+        @TableName = 'ltbl_Import_DTS_DCS_Documents'
+
+    EXEC lstp_Import_DTS_DCS_ApplyFieldMappings_Map
+        @GroupRef = @GroupRef,
+        @BatchRef = @BatchRef,
+        @MappingSetRef = '5e9494c9-cf12-4475-b800-152384e6deea', -- DocumentGroup
+        @TableName = 'ltbl_Import_DTS_DCS_Documents'
+
+    EXEC lstp_Import_DTS_DCS_ApplyFieldMappings_Map
+        @GroupRef = @GroupRef,
+        @BatchRef = @BatchRef,
+        @MappingSetRef = '37c16a94-6b28-4b28-9c3a-5737beba6065', -- Boolean: DFO
+        @TableName = 'ltbl_Import_DTS_DCS_Documents'
+
+    EXEC lstp_Import_DTS_DCS_ApplyFieldMappings_Rename
+        @GroupRef = @GroupRef,
+        @BatchRef = @BatchRef,
+        @MappingSetRef = '62049a10-67af-4773-a95d-b8770382d540', -- Document Renaming
+        @TableName = 'ltbl_Import_DTS_DCS_Documents'
+        
+    EXEC lstp_Import_DTS_DCS_ApplyFieldMappings_Rename
+        @GroupRef = @GroupRef,
+        @BatchRef = @BatchRef,
+        @MappingSetRef = '4c6875f6-4cfe-4d74-8ccd-b21d10319ac1', -- Revsion Renaming
+        @TableName = 'ltbl_Import_DTS_DCS_Revisions'
+
+    EXEC lstp_Import_DTS_DCS_ApplyFieldMappings_Rename
+        @GroupRef = @GroupRef,
+        @BatchRef = @BatchRef,
+        @MappingSetRef = 'd7910950-5649-438a-a41f-2a8eed18eca0', -- Revsion-File Renaming
+        @TableName = 'ltbl_Import_DTS_DCS_RevisionsFiles'
