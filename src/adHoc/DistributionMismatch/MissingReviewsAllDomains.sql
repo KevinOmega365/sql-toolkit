@@ -29,19 +29,16 @@
 */
 
 declare
-    @DomainPattern nvarchar(128) = '%',
+    @DomainPattern nvarchar(128) = '145',
     @CriticalityPattern nvarchar(14) = '%',
     @HideReviewResponsible bit = 0
 
-select
-    Domain,
-    MissingReviews = count(*)
-from
-(
+
     select --Count = count(*)
         D.Domain,
         D.DocumentID,
         D.CurrentRevision,
+        D.CurrentStep,
         D.Criticality,
         D.DocWorkflowStatus,
         ReviewResponsible = case 
@@ -279,8 +276,3 @@ from
         and isnull(CR.ReviewResponsible, '') <> ''
         and D.IsSuperseded = 0
         and D.IsVoided = 0
-) T
-group by
-    Domain
-order by
-    Domain
