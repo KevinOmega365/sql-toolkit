@@ -27,6 +27,10 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 * [CheckRevisionsWithoutFilesMetadataAndLog.sql](src/dcs_integration/CheckRevisionsWithoutFilesMetadataAndLog.sql): Related log and metadata details for missing files errors on revsions
 * [CheckRevisionsWithoutFilesMetadataAndLogWithErrorsOverTime.sql](src/dcs_integration/CheckRevisionsWithoutFilesMetadataAndLogWithErrorsOverTime.sql): All together: logs, metadata, error persistence
 
+## Following up distribution and reviews
+
+* [MissingReviewsAllDomains.sql](src/adHoc/DistributionMismatch/MissingReviewsAllDomains.sql): A pessimistic list of reviews that have not gone out
+
 ## Orphaned DB Objects
 
 Objects created by the integration, but nolonger present in the source data
