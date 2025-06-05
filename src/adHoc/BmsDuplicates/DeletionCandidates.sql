@@ -63,7 +63,7 @@ FROM
                         RevisionItemNo,
                         FileRef
                     HAVING
-                        COUNT(*) > 2
+                        COUNT(*) > 1
                 ) dup ON RF.FileRef = dup.FileRef
             WHERE
                 RF.Domain = 'PRO'
