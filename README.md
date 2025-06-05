@@ -81,7 +81,7 @@ SELECT TOP 10
     -- live links in af-db-manager
     activate_link_document =
         '<a href="' +
-        'https://pims.akerbp.com/dcs-documents-details?Domain=' +
+        '/dcs-documents-details?Domain=' +
         D.Domain +
         '&DocID=' +
         D.DocumentID +
