@@ -93,3 +93,32 @@ FROM
 ORDER BY
     NEWID()
 ```
+
+## Excel Links for Documents
+
+``` SQL
+/*
+ * Document List
+ * Inlcudes links for
+ *   Excel (
+ *      activate {
+ *          select the first URL cell
+ *          f2 (edit)
+ *          return (acivate)
+ *          arrow up (re-select)
+ *          ctrl+shift+end (select the column)
+ *          ctrl+d (copy the fomula down)
+ *      }
+ *  )
+ * NB: hyperlink fn uses ';' not ','
+ */
+select top 10
+    Domain,
+    DocumentID,
+    Title,
+    URL = '=HYPERLINK("https://pims.akerbp.com/dcs-documents-details?Domain="&A2&"&DocID="&B2; "Open "&B2)'
+from
+    dbo.atbl_DCS_Documents with (nolock)
+order by
+    newid()
+```
