@@ -29,6 +29,7 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 ## Following up distribution and reviews
 
+* [ImportDistributionStatusReport.sql](src/adHoc/DistributionMismatch/ImportDistributionStatusReport.sql): Discrepancies, Changes, Review Status and Receiver Existence
 * [MissingReviewsAllDomains.sql](src/adHoc/DistributionMismatch/MissingReviewsAllDomains.sql): A pessimistic list of reviews that have not gone out
 
 ## Orphaned DB Objects
