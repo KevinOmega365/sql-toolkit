@@ -34,7 +34,7 @@ from
                 INTEGR_REC_BATCHREF,
                 BatchCreated = max(Created)
             from
-                dbo.ltbl_Import_DTS_DCS_ErrorsInstances with (nolock)
+                dbo.ltbl_Import_DTS_DCS_Documents with (nolock)  -- look at the latest import; the newest error instance may be in the past
             group by
                 INTEGR_REC_GROUPREF,
                 INTEGR_REC_BATCHREF
