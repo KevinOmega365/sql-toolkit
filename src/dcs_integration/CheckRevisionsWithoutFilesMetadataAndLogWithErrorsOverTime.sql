@@ -266,6 +266,10 @@ from
         and LE.BatchRef = IRF.INTEGR_REC_BATCHREF
         and LE.object_guid = IRF.object_guid
 
+order by
+
+    Domain,
+    DocumentID
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
