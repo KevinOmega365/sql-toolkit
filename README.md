@@ -4,11 +4,6 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 ## Quick Links
 
-### Revisions missing files
-
-* [CheckRevisionsWithoutFiles.sql](src/reporting/CheckRevisionsWithoutFiles.sql): get a quick yes/no on metadata and "physical" file existence
-* [CorrelatedFileErrorsLogErrors.sql](src/adHoc/FileNotFoundErrors/CorrelatedFileErrorsLogErrors.sql): REST assembly errors with corresponding DocumentID and Revision from the import records
-
 ### Pipeline Overview
 
 * [PipelinesStartTimes.sql](src/dcs_integration/PipelinesStartTimes.sql): Pipeline start times.
