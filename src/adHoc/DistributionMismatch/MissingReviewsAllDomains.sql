@@ -37,6 +37,7 @@ declare
     select --Count = count(*)
         D.Domain,
         D.DocumentID,
+        URL = '=HYPERLINK("https://pims.akerbp.com/dcs-documents-details?Domain="&A2&"&DocID="&B2; "Open "&B2)',
         D.CurrentRevision,
         D.CurrentStep,
         D.Criticality,
