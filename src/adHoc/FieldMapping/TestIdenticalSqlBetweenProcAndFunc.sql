@@ -45,8 +45,8 @@ order by
 /*
  * Keep same values to repeat a test
  */
--- set @testGroupRef = '20cdd950-5822-4180-be29-90ff90da021e'
--- set @testTargetTable = 'ltbl_Import_CMS_CallOffs'
+set @testGroupRef = 'bbe7217e-9376-468f-a911-94cf5a806bc8'
+set @testTargetTable = 'ltbl_Import_CMS_ClassLibrary_Tags'
 
 -- -- uses all three input column-values
 -- set @testGroupRef = 'e8b280ec-2332-4e9e-89c9-13dda9e39bf5'
