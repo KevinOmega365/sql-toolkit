@@ -9,6 +9,7 @@ select
     ProjectReports.Description,
     ProjectReports.PointsInTimeType,
     ActivityRecordStatistics.ActivityCount,
+    LastFetch = ActivityRaw.Created,
     LastImport = ActivityRecordStatistics.MaxActivityCreation,
     ImportFreshness = rank() over (order by dateadd(hour, datediff(hour, 0, ActivityRecordStatistics.MaxActivityCreation), 0)), -- round to the nearest hour (see ref)
     MinMaxImportTimespan = ActivityCreationTimeSpanSeconds,
@@ -30,7 +31,11 @@ from
             ReportScheduleID
     )
     ActivityRecordStatistics
-    on ActivityRecordStatistics.ReportScheduleID = ProjectReports.id
+        on ActivityRecordStatistics.ReportScheduleID = ProjectReports.id
+    join dbo.ltbl_Import_ILAP_PcProjBaselineExp_ProjectsActivities_RAW as ActivityRaw with (nolock)
+        on ProjectReports.ID = json_value(ActivityRaw.RawJSON, '$.data.reportScheduleByIdWithRevisions[0].ReportScheduleId')
+
+
 
 -- select
 --     ReportScheduleID,
