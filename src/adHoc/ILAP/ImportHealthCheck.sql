@@ -5,6 +5,7 @@
  * MimMaxImportTimespan: Should be 0 : any value that could span multiple run would imply multiple imports and duplicated records
  */
 select
+    ProjectReports.PrimKey,
     ProjectReports.ID,
     ProjectReports.Description,
     ProjectReports.PointsInTimeType,
