@@ -12,7 +12,7 @@ create table #dataCoverageReport (
 )
 
 declare
-    @tableName nvarchar(128) = 'arpt_DCS_ReasonForIssuePlanAndReceived_Omnia',
+    @tableName nvarchar(128) = 'atbl_Arena_DocumentsProperties',
     @sampleSize int = 5,
     @percentagePrecision nvarchar(2) = 'P'
 
@@ -92,7 +92,7 @@ select
                     [' + name + '] is not null
             ) > ' + cast(@sampleSize as nvarchar(2)) + ' then (
                 select
-                    string_agg([' + name + '], '', '')
+                    string_agg(cast([' + name + '] as nvarchar(max)), '', '')
                 from
                     (
                         select
@@ -113,7 +113,7 @@ select
             ) + ''...''
             else (
                 select
-                    string_agg([' + name + '], '', '')
+                    string_agg(cast([' + name + '] as nvarchar(max)), '', '')
                 from
                     (
                         select distinct
@@ -131,7 +131,6 @@ from
     sys.columns
 where
     object_id = object_id(@tableName)
-    and type_name(system_type_id) <> 'uniqueidentifier'
 
 --------------------------------------------------------------------------------
 
