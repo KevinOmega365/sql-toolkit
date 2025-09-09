@@ -112,7 +112,7 @@ select top 10
     Domain,
     DocumentID,
     Title,
-    URL = '=HYPERLINK("https://pims.akerbp.com/dcs-documents-details?Domain="&A2&"&DocID="&B2; "Open "&B2)'
+    URL = '=HYPERLINK("https://pims.akerbp.com/dcs-documents-details?Domain="&A2&"&DocID="&B2, "Open "&B2)'
 from
     dbo.atbl_DCS_Documents with (nolock)
 order by
