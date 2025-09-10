@@ -151,8 +151,8 @@ while @i <= @n
 begin
     select @query = sqlStatement from @PerColumnQueries where columnId = @i
     ---------------
-    print @query
-    -- exec (@query)
+    -- print @query
+    exec (@query)
     ---------------
     set @i = @i + 1
 end
