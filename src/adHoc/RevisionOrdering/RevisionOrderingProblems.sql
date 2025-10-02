@@ -19,7 +19,7 @@ select
     CurrentRevisionCreated,
     LastRevisionCreated,
     ProblemCount = count(*),
-    ProblemDetails = '[ "' + string_agg(Problem, '", "') + '"" ]'
+    ProblemDetails = '[ "' + string_agg(Problem, '", "') + '" ]'
 from
     (
         select
