@@ -166,4 +166,4 @@ where
     and CurrentRevisionCreatedBy = 'af_Integrations_ServiceUser'
     and HighestRevisionCreatedBy = 'af_Integrations_ServiceUser'
 
-    and abs(datediff(second, CurrentRevisionCreated, HighestRevisionCreated)) < 1000
+    and abs(datediff(second, CurrentRevisionCreated, HighestRevisionCreated)) < 10000
