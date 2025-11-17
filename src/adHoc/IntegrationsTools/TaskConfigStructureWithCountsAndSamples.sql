@@ -117,11 +117,15 @@ while(exists (select * from #ProcessingStack))
     * Put structure(s) back on the stack
     */
     insert into #ProcessingStack (
+        ConfigRef,
+        StepType,
         JsonObject,
         JsonPath,
         Type
     )
         select
+            ConfigRef = @ConfigRef,
+            StepType = @StepType,
             Entries.value,
             EntryPath =
                 @JsonPath +
