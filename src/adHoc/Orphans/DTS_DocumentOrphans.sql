@@ -111,7 +111,7 @@ ORDER BY
 --     ),
 --     IsVoided,
 --     IsSuperseded
---     -- , URL = '=HYPERLINK("https://pims.akerbp.com/dcs-documents-details?Domain="&A2&"&DocID="&B2; "Open "&B2)'
+--     -- , URL = '=HYPERLINK("https://pims.akerbp.com/dcs-documents-details?Domain="&A2&"&DocID="&B2, "Open "&B2)'
 -- FROM
 --     dbo.atbl_DCS_Documents AS D WITH (NOLOCK)
 --     LEFT JOIN dbo.ltbl_Import_DTS_DCS_Documents AS I WITH (NOLOCK)
