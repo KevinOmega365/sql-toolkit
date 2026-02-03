@@ -9,7 +9,38 @@ declare
 declare @GroupRef nvarchar(36) = @Yggdrasil -- '%'
 
 /*
- * Steps sample verbose
+ * steps by pipeline
+ */
+select
+    Pipeline = (
+        select Name
+        from dbo.atbl_Integrations_ScheduledTasksConfigGroups STCG with (nolock)
+        where STCG.PrimKey = P.INTEGR_REC_GROUPREF
+    ),
+    P.DCS_Step,
+    P.DCS_ReasonForIssue,
+    InstanceCount = count(*)
+from
+    dbo.ltbl_Import_DTS_DCS_DocumentsPlan P with (nolock)
+    join dbo.ltbl_Import_DTS_DCS_Documents D with (nolock)
+        on D.DCS_Domain = P.DCS_Domain
+        and D.DCS_DocumentID = P.DCS_DocumentID
+        and D.INTEGR_REC_GROUPREF = P.INTEGR_REC_GROUPREF
+        and D.INTEGR_REC_BATCHREF = P.INTEGR_REC_BATCHREF
+where
+    P.INTEGR_REC_STATUS <> 'ACTION_DELETE'
+    and P.INTEGR_REC_GROUPREF like @GroupRef
+group by
+    P.DCS_Step,
+    P.DCS_ReasonForIssue,
+    P.INTEGR_REC_GROUPREF
+order by
+    Pipeline,
+    P.DCS_Step,
+    P.DCS_ReasonForIssue
+
+/*
+ * steps by domain
  */
 select
     Pipeline = (
@@ -19,7 +50,8 @@ select
     ),
     P.DCS_Domain,
     P.DCS_Step,
-    P.DCS_ReasonForIssue
+    P.DCS_ReasonForIssue,
+    InstanceCount = count(*)
 from
     dbo.ltbl_Import_DTS_DCS_DocumentsPlan P with (nolock)
     join dbo.ltbl_Import_DTS_DCS_Documents D with (nolock)
@@ -42,7 +74,7 @@ order by
     P.DCS_ReasonForIssue
 
 /*
- * Steps sample verbose
+ * steps by domain verbose
  */
 select
     Pipeline = (
@@ -54,7 +86,8 @@ select
     P.DCS_Step,
     P.DCS_ReasonForIssue,
     D.companyDistribution,
-    D.otherCompanyDistributions
+    D.otherCompanyDistributions,
+    InstanceCount = count(*)
 from
     dbo.ltbl_Import_DTS_DCS_DocumentsPlan P with (nolock)
     join dbo.ltbl_Import_DTS_DCS_Documents D with (nolock)
