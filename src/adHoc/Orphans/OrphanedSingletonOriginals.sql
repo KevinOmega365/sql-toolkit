@@ -51,7 +51,8 @@ select
     RF.DocumentID,
     R.Revision,
     URL = '=HYPERLINK("https://pims.akerbp.com/dcs-documents-details?Domain="&A2&"&DocID="&B2, "Open")',
-    RF.OriginalFilename
+    RF.OriginalFilename,
+    RF.FileDescription
 from
     (
         select
@@ -83,7 +84,8 @@ from
             RF.Revision_ID,
             RF.RevisionItemNo,
             RF.OriginalFilename,
-            RF.FileRef
+            RF.FileRef,
+            RF.FileDescription
         from
             dbo.atbl_DCS_Documents as D with (nolock)
             join dbo.atbl_DCS_Revisions as R with (nolock)
