@@ -68,7 +68,7 @@ from
             and R.Revision not in ('V', 'S')
             and RF.Type in ('Original', 'Native')
             and RF.CreatedBy = 'af_Integrations_ServiceUser'
-            and RF.FileDescription not like '#%'
+            -- and RF.FileDescription not like '#%'
             and RF.FileDescription not like 'FROM MIPS%'
         group by
             R.ID,
