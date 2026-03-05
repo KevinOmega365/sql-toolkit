@@ -7,6 +7,8 @@
  * and there is only one
  */
 
+declare @GroupRef uniqueidentifier = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0'
+
 -------------------------------------------------------------------------------
 
 drop table if exists #ImportedFiles
@@ -38,7 +40,7 @@ select
 from
     dbo.ltbl_Import_DTS_DCS_RevisionsFiles with (nolock)
 where
-    INTEGR_REC_GROUPREF = 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0'
+    INTEGR_REC_GROUPREF = @GroupRef
 ;
 
 update statistics #ImportedFiles
@@ -52,7 +54,9 @@ select
     R.Revision,
     URL = '=HYPERLINK("https://pims.akerbp.com/dcs-documents-details?Domain="&A2&"&DocID="&B2, "Open")',
     RF.OriginalFilename,
-    RF.FileDescription
+    RF.FileDescription,
+    ImportDocExists = cast(case when ImportedDocuments.DCS_DocumentID is null then 0 else 1 end as bit),
+    ImportRevExists = cast(case when ImportedRevisions.DCS_Revision is null then 0 else 1 end as bit)
 from
     (
         select
@@ -100,6 +104,30 @@ from
             -- and RF.FileDescription not like '#%'
             and RF.FileDescription not like 'FROM MIPS%'
     ) as RF on RF.Revision_ID = R.ID
+    left join (
+        select
+            DCS_Domain,
+            DCS_DocumentID
+        from
+            dbo.ltbl_Import_DTS_DCS_Documents
+        where
+            INTEGR_REC_GROUPREF = @GroupRef
+    ) as ImportedDocuments
+        on ImportedDocuments.DCS_Domain  = RF.Domain
+        and ImportedDocuments.DCS_DocumentID  = RF.DocumentID
+    left join (
+        select
+            DCS_Domain,
+            DCS_DocumentID,
+            DCS_Revision
+        from
+            dbo.ltbl_Import_DTS_DCS_Revisions
+        where
+            INTEGR_REC_GROUPREF = @GroupRef
+    ) as ImportedRevisions
+        on ImportedRevisions.DCS_Domain  = RF.Domain
+        and ImportedRevisions.DCS_DocumentID  = RF.DocumentID
+        and ImportedRevisions.DCS_Revision  = R.Revision
 where
     not exists (
         select *
