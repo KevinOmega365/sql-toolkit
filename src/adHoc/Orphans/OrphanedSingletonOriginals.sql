@@ -55,19 +55,24 @@ select
     URL = '=HYPERLINK("https://pims.akerbp.com/dcs-documents-details?Domain="&A2&"&DocID="&B2, "Open")',
     RF.OriginalFilename,
     RF.FileDescription,
-    ImportDocExists = cast(case when ImportedDocuments.DCS_DocumentID is null then 0 else 1 end as bit),
-    ImportRevExists = cast(case when ImportedRevisions.DCS_Revision is null then 0 else 1 end as bit)
+    ImportDocExists = cast(case when ImportedDocuments.Primkey is null then 0 else 1 end as bit),
+    ImportRevExists = cast(case when ImportedRevisions.Primkey is null then 0 else 1 end as bit)
 from
     (
         select
-            R.ID,
+            R.Domain,
+            R.DocumentID,
+            R.RevisionItemNo,
             R.Revision
         from
             dbo.atbl_DCS_Documents D with (nolock)
             join dbo.atbl_DCS_Revisions R with (nolock)
-                on R.ID = D.CurrentRevision_ID
+                on R.Domain = D.Domain
+                and R.DocumentID = D.DocumentID
             join dbo.atbl_DCS_RevisionsFiles RF with (nolock)
-                on RF.Revision_ID = R.ID
+                on RF.Domain = R.Domain
+                and RF.DocumentID = R.DocumentID
+                and RF.RevisionItemNo = R.RevisionItemNo
         where
             RF.Domain in ('128', '187')
             and R.Revision not in ('V', 'S')
@@ -76,7 +81,9 @@ from
             -- and RF.FileDescription not like '#%'
             and RF.FileDescription not like 'FROM MIPS%'
         group by
-            R.ID,
+            R.Domain,
+            R.DocumentID,
+            R.RevisionItemNo,
             R.Revision
         having
             count(*) = 1
@@ -103,13 +110,17 @@ from
             and RF.CreatedBy = 'af_Integrations_ServiceUser'
             -- and RF.FileDescription not like '#%'
             and RF.FileDescription not like 'FROM MIPS%'
-    ) as RF on RF.Revision_ID = R.ID
+    ) as RF
+        on RF.Domain = R.Domain
+        and RF.DocumentID = R.DocumentID
+        and RF.RevisionItemNo = R.RevisionItemNo
     left join (
         select
             DCS_Domain,
-            DCS_DocumentID
+            DCS_DocumentID,
+            Primkey
         from
-            dbo.ltbl_Import_DTS_DCS_Documents
+            dbo.ltbl_Import_DTS_DCS_Documents with (nolock)
         where
             INTEGR_REC_GROUPREF = @GroupRef
     ) as ImportedDocuments
@@ -119,9 +130,10 @@ from
         select
             DCS_Domain,
             DCS_DocumentID,
-            DCS_Revision
+            DCS_Revision,
+            Primkey
         from
-            dbo.ltbl_Import_DTS_DCS_Revisions
+            dbo.ltbl_Import_DTS_DCS_Revisions with (nolock)
         where
             INTEGR_REC_GROUPREF = @GroupRef
     ) as ImportedRevisions
@@ -136,7 +148,13 @@ where
             IRF.DCS_Domain COLLATE Latin1_General_CI_AS = RF.Domain
             and IRF.DCS_DocumentID COLLATE Latin1_General_CI_AS = RF.DocumentID
             and IRF.DCS_RevisionItemNo = RF.RevisionItemNo
-            and IRF.DCS_OriginalFilename COLLATE Latin1_General_CI_AS = RF.OriginalFilename
+            and IRF.DCS_OriginalFilename COLLATE Latin1_General_CI_AS = (
+                case
+                    when RF.OriginalFilename like 'TEMP_NAME_%' -- WTEL...F!
+                    then right(RF.OriginalFilename, len(RF.OriginalFilename) - len('TEMP_NAME_'))
+                    else RF.OriginalFilename
+                end
+            )
     )
 order by
     RF.Domain,
