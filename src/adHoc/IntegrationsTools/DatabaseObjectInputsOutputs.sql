@@ -50,35 +50,35 @@ order by
  * JSON
  */
 select
-	[objectName] = referenced_entity_name,
-	[columnsRead] = (
-		select
-			[columnName] = referenced_minor_name
-		from
-			#OnboardingReferences C
-		where
-			C.referenced_entity_name = O.referenced_entity_name
-			and C.referenced_minor_name is not null
-			and is_selected = 1
-		for
-			json path
-	),
-	[columnsWritten] = (
-		select
-			[columnName] = referenced_minor_name
-		from
-			#OnboardingReferences C
-		where
-			C.referenced_entity_name = O.referenced_entity_name
-			and C.referenced_minor_name is not null
-			and C.is_updated = 1
-		for
-			json path
-	)
+    [objectName] = referenced_entity_name,
+    [columnsRead] = (
+        select
+            [columnName] = referenced_minor_name
+        from
+            #OnboardingReferences C
+        where
+            C.referenced_entity_name = O.referenced_entity_name
+            and C.referenced_minor_name is not null
+            and is_selected = 1
+        for
+            json path
+    ),
+    [columnsWritten] = (
+        select
+            [columnName] = referenced_minor_name
+        from
+            #OnboardingReferences C
+        where
+            C.referenced_entity_name = O.referenced_entity_name
+            and C.referenced_minor_name is not null
+            and C.is_updated = 1
+        for
+            json path
+    )
 from
-	#OnboardingReferences O
+    #OnboardingReferences O
 group by
-	referenced_entity_name
+    referenced_entity_name
 order by
-	referenced_entity_name
+    referenced_entity_name
 for json path
