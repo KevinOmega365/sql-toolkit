@@ -36,6 +36,14 @@ declare
 ----------------------------------------------------------------- parameters --
 -------------------------------------------------------------------------------
 
+/*
+ * TURN OFF TRANSACTIONS
+ * in the Query Options
+ * if not in "what if" mode
+ * otherwise you'll have to kill the session
+ * (which also requires turning of transactions in the query options)
+ * (or use SSMS)
+ */
 declare
     @GroupRef uniqueidentifier = @Valhall,
     @WhatIf bit = 1 -- !!! 1 to test | 0 to make changes !!!
