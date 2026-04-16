@@ -9,16 +9,14 @@ drop table if exists  #RevisionsToFix
 
 ------------------------------------------------------------------ constants --
 
+
 declare
-
-    @ErrorMessage nvarchar(max) = 'Quality Failure: Cannot add non-current revision (lower revision number and not prior date)',
-
     @HighterRevisionWithPriorDatePattern nvarchar(max) = '%(prior date and not lower revision number)',
     @LowerRevisionWithLaterDatePattern nvarchar(max) = '%(lower revision number and not prior date)',
 
-    @SetAfterCurrentAction nvarchar(max) = 'set revision date to one day after current',
-    @SetBeforeCurrentAction nvarchar(max) = 'set revision date to one day prior to current',
-    @NoChangesAction nvarchar(max) = 'insert with no changes',
+    -- @SetAfterCurrentAction nvarchar(max) = 'set revision date to one day after current',
+    -- @SetBeforeCurrentAction nvarchar(max) = 'set revision date to one day prior to current',
+    -- @NoChangesAction nvarchar(max) = 'insert with no changes',
 
     @ACTION_INSERT AS NVARCHAR(50) = (
         SELECT TOP 1 ID
@@ -45,7 +43,8 @@ declare
  * (or use SSMS)
  */
 declare
-    @GroupRef uniqueidentifier = @Valhall,
+    @GroupRef uniqueidentifier = @Yggdrasil,
+    @ErrorMessagePattern nvarchar(max) = @HighterRevisionWithPriorDatePattern,
     @WhatIf bit = 1 -- !!! 1 to test | 0 to make changes !!!
 
 -------------------------------------------------------------------------------
@@ -72,7 +71,7 @@ from
     dbo.ltbl_Import_DTS_DCS_Revisions with (nolock)
 where
     INTEGR_REC_GROUPREF = @GroupRef
-    and INTEGR_REC_ERROR = @ErrorMessage
+    and INTEGR_REC_ERROR like @ErrorMessagePattern
 
 -------------------------------------------------------------------------------
 ----------------------------------------------- Calculate new revision dates --
@@ -149,8 +148,10 @@ select
     A.DocumentID,
     A.Revision,
     NewDate = case
-        when A.IsInPims = 0
-        then dateadd(day, A.RevisionOrder - NextPimsRevOrder.RevisionOrder, NextPimsRev.RevisionDate)
+        when A.IsInPims = 0 and NextPimsRev.RevisionDate is not null
+            then dateadd(day, A.RevisionOrder - NextPimsRevOrder.RevisionOrder, NextPimsRev.RevisionDate)
+        when A.IsInPims = 0 and NextPimsRev.RevisionDate is null
+            then dateadd(day, 1, PrevPimsRev.RevisionDate)
         else null
     end,
     A.RevisionDate,
@@ -160,6 +161,7 @@ into
     #FixedPredatedRevisions
 from
     #OffsetRevisionDates A
+
     cross apply (
         select RevisionOrder = min(RevisionOrder)
         from #OffsetRevisionDates NPRO
@@ -173,6 +175,21 @@ from
         on NextPimsRev.Domain = A.Domain
         and NextPimsRev.DocumentID = A.DocumentID
         and NextPimsRev.RevisionOrder = NextPimsRevOrder.RevisionOrder
+
+    cross apply (
+        select RevisionOrder = max(RevisionOrder)
+        from #OffsetRevisionDates PPRO
+        where
+            PPRO.Domain = A.Domain
+            and PPRO.DocumentID = A.DocumentID
+            and PPRO.RevisionOrder < A.RevisionOrder
+            and PPRO.IsInPims = 1
+    ) PrevPimsRevOrder
+    left join #OffsetRevisionDates PrevPimsRev
+        on PrevPimsRev.Domain = A.Domain
+        and PrevPimsRev.DocumentID = A.DocumentID
+        and PrevPimsRev.RevisionOrder = PrevPimsRevOrder.RevisionOrder
+
 where
     A.IsInPims = 0
 order by
