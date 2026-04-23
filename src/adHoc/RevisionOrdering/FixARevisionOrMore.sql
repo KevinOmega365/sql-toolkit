@@ -14,14 +14,15 @@ declare
     @HighterRevisionWithPriorDatePattern nvarchar(max) = '%(prior date and not lower revision number)',
     @LowerRevisionWithLaterDatePattern nvarchar(max) = '%(lower revision number and not prior date)',
 
-    -- @SetAfterCurrentAction nvarchar(max) = 'set revision date to one day after current',
-    -- @SetBeforeCurrentAction nvarchar(max) = 'set revision date to one day prior to current',
-    -- @NoChangesAction nvarchar(max) = 'insert with no changes',
-
     @ACTION_INSERT AS NVARCHAR(50) = (
         SELECT TOP 1 ID
         FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK)
         WHERE ID='ACTION_INSERT'
+    ),
+    @QUALITY_CHECK_FAILED AS NVARCHAR(50) = (
+        SELECT TOP 1 ID
+        FROM dbo.atbl_Integrations_ImportStatuses WITH (NOLOCK)
+        WHERE ID='QUALITY_CHECK_FAILED'
     ),
 
     @IvarAasen uniqueidentifier = 'f6c3687c-5511-48f2-98e5-8e84eee9b689',
@@ -43,8 +44,7 @@ declare
  * (or use SSMS)
  */
 declare
-    @GroupRef uniqueidentifier = @Yggdrasil,
-    @ErrorMessagePattern nvarchar(max) = @HighterRevisionWithPriorDatePattern,
+    @GroupRef uniqueidentifier = @Valhall,
     @WhatIf bit = 1 -- !!! 1 to test | 0 to make changes !!!
 
 -------------------------------------------------------------------------------
@@ -52,6 +52,7 @@ declare
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------- get batch ref --
+
 declare
     @BatchRef uniqueidentifier = (
         select top 1
@@ -63,6 +64,7 @@ declare
     )
 
 ---------------------------------------------------------- get revision keys --
+
 select
     PrimKey
 into
@@ -71,7 +73,11 @@ from
     dbo.ltbl_Import_DTS_DCS_Revisions with (nolock)
 where
     INTEGR_REC_GROUPREF = @GroupRef
-    and INTEGR_REC_ERROR like @ErrorMessagePattern
+    and INTEGR_REC_STATUS = @QUALITY_CHECK_FAILED
+    and (
+        INTEGR_REC_ERROR like @HighterRevisionWithPriorDatePattern
+        or INTEGR_REC_ERROR like @LowerRevisionWithLaterDatePattern
+    )
 
 -------------------------------------------------------------------------------
 ----------------------------------------------- Calculate new revision dates --
