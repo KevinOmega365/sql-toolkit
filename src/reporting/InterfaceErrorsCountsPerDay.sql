@@ -19,7 +19,7 @@ select
 from
     dbo.atbl_Integrations_ScheduledTasksServicesLog aS L with (nolock)
 where
-    [ServiceName] = @Param0
+    [ServiceName] = @ServiceName
     and Created > cast(dateadd(day, - 28, getdate()) as date)
 group by
     cast(L.Created as date),
