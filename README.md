@@ -4,6 +4,10 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 ## Quick Links
 
+### Missing Files
+
+* [CorrelatedFileErrorsLogErrors.sql](src/adHoc/FileNotFoundErrors/CorrelatedFileErrorsLogErrors.sql): Iterface error from files
+
 ### Pipeline Overview
 
 * [PipelinesStartTimes.sql](src/dcs_integration/PipelinesStartTimes.sql): Pipeline start times.
