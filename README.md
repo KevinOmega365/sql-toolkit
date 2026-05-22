@@ -6,7 +6,7 @@ SQL Snippets (mostly for Omega365 Appframe Databases)
 
 ### Error Overview
 
-* [ImportReportDtsDcs.sql](src/reporting/ImportReportDtsDcs.sql): Over
+* [ImportReportDtsDcs.sql](src/reporting/ImportReportDtsDcs.sql): Overview of Document Import Errors
 
 ### Missing Files
 
