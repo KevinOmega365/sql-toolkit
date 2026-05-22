@@ -1,4 +1,4 @@
-declare @groupRef uniqueidentifier = '4752565e-84f0-4592-a446-f0720bbc3540'
+declare @groupRef nvarchar(36) = '%' -- 'efd3449e-3a44-4c38-b0e7-f57ca48cf8b0'
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------  Import Totals --
@@ -15,7 +15,7 @@ from
         from
             dbo.ltbl_Import_DTS_DCS_Documents with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
 
     union all
 
@@ -26,7 +26,7 @@ from
         from
             dbo.ltbl_Import_DTS_DCS_Revisions with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
 
     union all
 
@@ -35,9 +35,9 @@ from
             EntitySortOrder = 3,
             Count = count(*)
         from
-            dbo.ltbl_Import_DTS_DCS_RevisionFiles with (nolock)
+            dbo.ltbl_Import_DTS_DCS_RevisionsFiles with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
 
     ) EntitiyCounts
 order by
@@ -60,7 +60,7 @@ from
         from
             dbo.ltbl_Import_DTS_DCS_Documents with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
         group by
             INTEGR_REC_STATUS
 
@@ -74,7 +74,7 @@ from
         from
             dbo.ltbl_Import_DTS_DCS_Revisions with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
         group by
             INTEGR_REC_STATUS
 
@@ -86,9 +86,9 @@ from
             EntitySortOrder = 3,
             Count = count(*)
         from
-            dbo.ltbl_Import_DTS_DCS_RevisionFiles with (nolock)
+            dbo.ltbl_Import_DTS_DCS_RevisionsFiles with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
         group by
             INTEGR_REC_STATUS
 
@@ -116,7 +116,7 @@ from
         from
             dbo.ltbl_Import_DTS_DCS_Documents with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
             and INTEGR_REC_STATUS like '%FAIL%'
         group by
             INTEGR_REC_STATUS,
@@ -133,7 +133,7 @@ from
         from
             dbo.ltbl_Import_DTS_DCS_Revisions with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
             and INTEGR_REC_STATUS like '%FAIL%'
         group by
             INTEGR_REC_STATUS,
@@ -148,9 +148,9 @@ from
             EntitySortOrder = 3,
             Count = count(*)
         from
-            dbo.ltbl_Import_DTS_DCS_RevisionFiles with (nolock)
+            dbo.ltbl_Import_DTS_DCS_RevisionsFiles with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
             and INTEGR_REC_STATUS like '%FAIL%'
         group by
             INTEGR_REC_STATUS,
@@ -182,7 +182,7 @@ from
         from
             dbo.ltbl_Import_DTS_DCS_Documents with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
             and INTEGR_REC_STATUS like '%FAIL%'
 
     union all
@@ -196,7 +196,7 @@ from
         from
             dbo.ltbl_Import_DTS_DCS_Revisions with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
             and INTEGR_REC_STATUS like '%FAIL%'
 
     union all
@@ -208,9 +208,9 @@ from
             EntityError = '{"RevisionFile": "' + INTEGR_REC_ERROR + '"}',
             PimsLink = '=HYPERLINK(CONCAT("https://pims.akerbp.com/dcs-documents-details?Domain=";A2;"&DocID=";B2);"Open in Pims")'
         from
-            dbo.ltbl_Import_DTS_DCS_RevisionFiles with (nolock)
+            dbo.ltbl_Import_DTS_DCS_RevisionsFiles with (nolock)
         where
-            INTEGR_REC_GROUPREF = @groupRef
+            INTEGR_REC_GROUPREF like @groupRef
             and INTEGR_REC_STATUS like '%FAIL%'
 
     ) DocumentsErrors
