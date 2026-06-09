@@ -1,0 +1,5 @@
+I have a T-SQL query that I'd like you to modify. I would like you add a column call JobSchedule.
+
+The column should be an nvarchar. It should present a human readable schedule. The information from msdb.dbo.sysschedules.
+
+I will first send a markdown with the documentation and then the query that needs to be modified
