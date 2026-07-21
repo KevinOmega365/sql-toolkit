@@ -45,7 +45,7 @@ Objects created by the integration, but nolonger present in the source data
 
 ## Data Coverage
 
-* [DataCoverageRatioPercentAndSample.sql](src/pipeline_development/): check percents of non-null column data and sample values
+* [DataCoverageRatioPercentAndSample.sql](src/pipeline_development/DataCoverageRatioPercentAndSample.sql): check percents of non-null column data and sample values
 
 ## Finding scripts in this dumster fire
 
