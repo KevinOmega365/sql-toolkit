@@ -6,8 +6,8 @@
 declare @AllowOnlyCleanData bit = 0
 
 declare @crlf nchar(2) = CHAR(13)+CHAR(10)
+declare @MarkdownTableHeader nvarchar(max) = '| Vendor | User Count | Email domain: User Count |' + @crlf + '| --- | --- | --- |'
 declare @MarkdownTitleAndDescription nvarchar(max) = '# Vendors - Companies' + @crlf + @crlf + 'vendors - email domains - user counts - missing values'
-declare @MarkdownTableHeader nvarchar(max) = '| vendor | UserCount | EmailomainUserCount |' + @crlf + '| --- | --- | --- |'
 
 select
     MarkdownReport =
@@ -17,13 +17,13 @@ select
 from
     (
         select
-            MarkdownTableRow = '| ' + vendor + ' | ' + cast(UserCount as nvarchar(3)) + ' | ' + EmailomainUserCountMarkdown + ' |'
+            MarkdownTableRow = '| ' + vendor + ' | ' + cast(UserCount as nvarchar(3)) + ' | ' + EmailDomainUserCountMarkdown + ' |'
         from
             (
                 select
                     vendor,
                     UserCount = sum(VendorDomainCount),
-                    EmailomainUserCountMarkdown = string_agg(EmailDomain + ': ' + cast(VendorDomainCount as nvarchar(3)), '<br>')
+                    EmailDomainUserCountMarkdown = string_agg(EmailDomain + ': ' + cast(VendorDomainCount as nvarchar(3)), '<br>')
                 from
                     (
                         select
